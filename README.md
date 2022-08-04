@@ -249,7 +249,8 @@ runs `go run ./parser/parse_template.go generated/template.yml generated/pipelin
 to create `ci/generated/pipeline.yml`. None of the generated files `template.yml` 
 or `pipeline.yml` are checked in.
 
-To update the production pipeline: `PIPELINE_NAME=gpupgrade FLY_TARGET=prod make set-pipeline`
+To update the production pipeline locally checkout master and be sure to pull 
+the latest code and fly with `PIPELINE_NAME=gpupgrade FLY_TARGET=prod make set-pipeline`
 
 To make the pipeline publicly visible run `make expose-pipeline`. This will 
 allow anyone to see the pipeline and its status. However, the task details will 
