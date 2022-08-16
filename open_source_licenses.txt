@@ -1,6 +1,6 @@
-open_source_licenses.txt
+open_source_license.txt
 
-VMware Tanzu Greenplum Upgrade 1.4.0 GA
+VMware Tanzu Greenplum Upgrade 1.5.0 GA
 ======================================================================
 
 The following copyright statements and licenses apply to various open
@@ -23,6 +23,7 @@ this document. This list is provided for your convenience; please read
 further if you wish to review the copyright notice(s) and the full text
 of the license associated with each component.
 
+PART 1. APPLICATION LAYER
 
 SECTION 1: Apache License, V2.0
 
@@ -66,6 +67,7 @@ APPENDIX. Standard License Files
 
    >>> Apache License, V2.0
 
+==================== PART 1. APPLICATION LAYER ====================
 
 -------------------- SECTION 1: Apache License, V2.0 --------------------
 
@@ -2208,15 +2210,9 @@ APPENDIX. Standard License Files
 
        gpupgrade-1.3.0-68-gdd26028f/open_source_licenses.txt
 
-       Copyright (c) 2009-2011 VMware, Inc.
+       Copyright 2017-Present VMware, Inc.
 
-       See SECTION 52 in 'LICENSE TEXT REFERENCE TABLE'
-
-       gpupgrade-1.3.0-68-gdd26028f/open_source_licenses.txt
-
-       Copyright (c) 2006 Kirill Simonov
-
-       See SECTION 27 in 'LICENSE TEXT REFERENCE TABLE'
+       See SECTION 44 in 'LICENSE TEXT REFERENCE TABLE'
 
        gpupgrade-1.3.0-68-gdd26028f/open_source_licenses.txt
 
@@ -2226,15 +2222,21 @@ APPENDIX. Standard License Files
 
        gpupgrade-1.3.0-68-gdd26028f/open_source_licenses.txt
 
+       Copyright (c) 2006 Kirill Simonov
+
+       See SECTION 27 in 'LICENSE TEXT REFERENCE TABLE'
+
+       gpupgrade-1.3.0-68-gdd26028f/open_source_licenses.txt
+
        Copyright 2020 VMware, Inc.
 
        See SECTION 55 in 'LICENSE TEXT REFERENCE TABLE'
 
        gpupgrade-1.3.0-68-gdd26028f/open_source_licenses.txt
 
-       Copyright 2017-Present VMware, Inc.
+       Copyright (c) 2009-2011 VMware, Inc.
 
-       See SECTION 44 in 'LICENSE TEXT REFERENCE TABLE'
+       See SECTION 52 in 'LICENSE TEXT REFERENCE TABLE'
 
        gpupgrade-1.3.0-68-gdd26028f/open_source_licenses.txt
 
@@ -3316,27 +3318,9 @@ APPENDIX. Standard License Files
 
        gpupgrade-1.3.0-68-gdd26028f/open_source_licenses.txt
 
-       Copyright (c) 2013-2021 Jack Christensen
+       Copyright (c) 2009 The Go Authors
 
-       See SECTION 61 in 'LICENSE TEXT REFERENCE TABLE'
-
-       gpupgrade-1.3.0-68-gdd26028f/open_source_licenses.txt
-
-       Copyright (c) 2009 Apple Inc.
-
-       See SECTION 53 in 'LICENSE TEXT REFERENCE TABLE'
-
-       gpupgrade-1.3.0-68-gdd26028f/open_source_licenses.txt
-
-       Copyright 2015 The Go Authors
-
-       See SECTION 59 in 'LICENSE TEXT REFERENCE TABLE'
-
-       gpupgrade-1.3.0-68-gdd26028f/open_source_licenses.txt
-
-       Copyright 2019 The Go Authors
-
-       See SECTION 59 in 'LICENSE TEXT REFERENCE TABLE'
+       See SECTION 54 in 'LICENSE TEXT REFERENCE TABLE'
 
        gpupgrade-1.3.0-68-gdd26028f/open_source_licenses.txt
 
@@ -3358,6 +3342,12 @@ APPENDIX. Standard License Files
 
        gpupgrade-1.3.0-68-gdd26028f/open_source_licenses.txt
 
+       Copyright (c) 2013-2021 Jack Christensen
+
+       See SECTION 61 in 'LICENSE TEXT REFERENCE TABLE'
+
+       gpupgrade-1.3.0-68-gdd26028f/open_source_licenses.txt
+
        Copyright 2009 The Go Authors
 
        See SECTION 57 in 'LICENSE TEXT REFERENCE TABLE'
@@ -3370,9 +3360,9 @@ APPENDIX. Standard License Files
 
        gpupgrade-1.3.0-68-gdd26028f/open_source_licenses.txt
 
-       Copyright (c) 2009 The Go Authors
+       Copyright 2019 The Go Authors
 
-       See SECTION 54 in 'LICENSE TEXT REFERENCE TABLE'
+       See SECTION 59 in 'LICENSE TEXT REFERENCE TABLE'
 
        gpupgrade-1.3.0-68-gdd26028f/open_source_licenses.txt
 
@@ -3386,13 +3376,37 @@ APPENDIX. Standard License Files
 
        See SECTION 53 in 'LICENSE TEXT REFERENCE TABLE'
 
+       gpupgrade-1.3.0-68-gdd26028f/open_source_licenses.txt
+
+       Copyright (c) 2009 Apple Inc.
+
+       See SECTION 53 in 'LICENSE TEXT REFERENCE TABLE'
+
+       gpupgrade-1.3.0-68-gdd26028f/open_source_licenses.txt
+
+       Copyright 2015 The Go Authors
+
+       See SECTION 59 in 'LICENSE TEXT REFERENCE TABLE'
+
        > MIT
 
        gpupgrade-1.3.0-68-gdd26028f/open_source_licenses.txt
 
-       Copyright (c) 2013-2019, DATA-DOG team
+       Copyright Jorn Zaefferer
+
+       See SECTION 49 in 'LICENSE TEXT REFERENCE TABLE'
+
+       gpupgrade-1.3.0-68-gdd26028f/open_source_licenses.txt
+
+       Copyright (c) 2009 The Go Authors
 
        See SECTION 60 in 'LICENSE TEXT REFERENCE TABLE'
+
+       gpupgrade-1.3.0-68-gdd26028f/open_source_licenses.txt
+
+       Copyright (c) 2013, Jason Moiron
+
+       See SECTION 62 in 'LICENSE TEXT REFERENCE TABLE'
 
        gpupgrade-1.3.0-68-gdd26028f/open_source_licenses.txt
 
@@ -3402,9 +3416,9 @@ APPENDIX. Standard License Files
 
        gpupgrade-1.3.0-68-gdd26028f/open_source_licenses.txt
 
-       Copyright (c) 2009 The Go Authors
+       Copyright (c) 2013-2021 Jack Christensen
 
-       See SECTION 60 in 'LICENSE TEXT REFERENCE TABLE'
+       See SECTION 40 in 'LICENSE TEXT REFERENCE TABLE'
 
        gpupgrade-1.3.0-68-gdd26028f/open_source_licenses.txt
 
@@ -3432,6 +3446,12 @@ APPENDIX. Standard License Files
 
        gpupgrade-1.3.0-68-gdd26028f/open_source_licenses.txt
 
+       Copyright (c) 2013-2019, DATA-DOG team
+
+       See SECTION 60 in 'LICENSE TEXT REFERENCE TABLE'
+
+       gpupgrade-1.3.0-68-gdd26028f/open_source_licenses.txt
+
        Copyright (c) 2019 The Go Authors
 
        See SECTION 47 in 'LICENSE TEXT REFERENCE TABLE'
@@ -3447,24 +3467,6 @@ APPENDIX. Standard License Files
        Copyright 2013 jQuery Foundation and other contributors
 
        See SECTION 49 in 'LICENSE TEXT REFERENCE TABLE'
-
-       gpupgrade-1.3.0-68-gdd26028f/open_source_licenses.txt
-
-       Copyright Jorn Zaefferer
-
-       See SECTION 49 in 'LICENSE TEXT REFERENCE TABLE'
-
-       gpupgrade-1.3.0-68-gdd26028f/open_source_licenses.txt
-
-       Copyright (c) 2013, Jason Moiron
-
-       See SECTION 62 in 'LICENSE TEXT REFERENCE TABLE'
-
-       gpupgrade-1.3.0-68-gdd26028f/open_source_licenses.txt
-
-       Copyright (c) 2013-2021 Jack Christensen
-
-       See SECTION 40 in 'LICENSE TEXT REFERENCE TABLE'
 
        > PostgreSQL
 
@@ -4709,15 +4711,15 @@ APPENDIX. Standard License Files
 
        protobuf/integration_test.go
 
-       Copyright d d d d The Go Authors
-
-       See SECTION 29 in 'LICENSE TEXT REFERENCE TABLE'
-
-       protobuf/integration_test.go
-
        Copyright 2019 The Go Authors
 
        See SECTION 10 in 'LICENSE TEXT REFERENCE TABLE'
+
+       protobuf/integration_test.go
+
+       Copyright d d d d The Go Authors
+
+       See SECTION 29 in 'LICENSE TEXT REFERENCE TABLE'
 
        protobuf/internal/benchmarks/bench_test.go
 
@@ -12247,15 +12249,15 @@ APPENDIX. Standard License Files
 
        tools-0.1.5/gopls/internal/hooks/licenses.go
 
-       Copyright (c) 2012-2016 The go-diff Authors
-
-       See SECTION 7 in 'LICENSE TEXT REFERENCE TABLE'
-
-       tools-0.1.5/gopls/internal/hooks/licenses.go
-
        Copyright (c) 2015, Daniel Marti
 
        See SECTION 31 in 'LICENSE TEXT REFERENCE TABLE'
+
+       tools-0.1.5/gopls/internal/hooks/licenses.go
+
+       Copyright (c) 2012-2016 The go-diff Authors
+
+       See SECTION 7 in 'LICENSE TEXT REFERENCE TABLE'
 
        tools-0.1.5/gopls/internal/hooks/licenses_test.go
 
@@ -13921,15 +13923,15 @@ APPENDIX. Standard License Files
 
        tools-0.1.5/internal/lsp/cmd/info.go
 
-       Copyright 2019 The Go Authors
-
-       See SECTION 10 in 'LICENSE TEXT REFERENCE TABLE'
-
-       tools-0.1.5/internal/lsp/cmd/info.go
-
        Copyright (c) Microsoft Corporation
 
        See SECTION 7 in 'LICENSE TEXT REFERENCE TABLE'
+
+       tools-0.1.5/internal/lsp/cmd/info.go
+
+       Copyright 2019 The Go Authors
+
+       See SECTION 10 in 'LICENSE TEXT REFERENCE TABLE'
 
        tools-0.1.5/internal/lsp/cmd/links.go
 
@@ -14401,13 +14403,13 @@ APPENDIX. Standard License Files
 
        tools-0.1.5/internal/lsp/helper/helper.go
 
-       Copyright 2020 The Go Authors
+       Copyright 2021 The Go Authors
 
        See SECTION 10 in 'LICENSE TEXT REFERENCE TABLE'
 
        tools-0.1.5/internal/lsp/helper/helper.go
 
-       Copyright 2021 The Go Authors
+       Copyright 2020 The Go Authors
 
        See SECTION 10 in 'LICENSE TEXT REFERENCE TABLE'
 
@@ -15551,12 +15553,6 @@ APPENDIX. Standard License Files
 
        tools-0.1.5/gopls/internal/hooks/licenses.go
 
-       Copyright (c) 2016 Dominik Honnef
-
-       See SECTION 26 in 'LICENSE TEXT REFERENCE TABLE'
-
-       tools-0.1.5/gopls/internal/hooks/licenses.go
-
        Copyright (c) 2019, Daniel Marti
 
        See SECTION 3 in 'LICENSE TEXT REFERENCE TABLE'
@@ -15566,6 +15562,12 @@ APPENDIX. Standard License Files
        Copyright (c) 2017 The Go Authors
 
        See SECTION 1 in 'LICENSE TEXT REFERENCE TABLE'
+
+       tools-0.1.5/gopls/internal/hooks/licenses.go
+
+       Copyright (c) 2016 Dominik Honnef
+
+       See SECTION 26 in 'LICENSE TEXT REFERENCE TABLE'
 
        tools-0.1.5/gopls/internal/hooks/licenses.go
 
@@ -23648,4 +23650,4 @@ a CD or equivalent physical medium. This offer to obtain a copy of the
 Source Files is valid for three years from the date you acquired this
 Software product. Alternatively, the Source Files may accompany the
 VMware product.
-[GREENPLUMUPGRADE140GAAT060722]
+[GREENPLUMUPGRADE150GAAT081122]
