@@ -65,7 +65,7 @@ func TestRun(t *testing.T) {
 		utils.System.MkdirAll = func(path string, perms os.FileMode) error {
 			called = true
 
-			expected, err := utils.GetPgUpgradeDir(greenplum.MirrorRole, 3, "RandomTimestamp")
+			expected, err := utils.GetPgUpgradeDir(greenplum.MirrorRole, 3, "RandomTimestamp", "6.20.0")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -100,7 +100,7 @@ func TestRun(t *testing.T) {
 	})
 
 	t.Run("does not fail if the pg_upgrade working directory already exists", func(t *testing.T) {
-		expected, err := utils.GetPgUpgradeDir(greenplum.MirrorRole, 3, "RandomTimestamp")
+		expected, err := utils.GetPgUpgradeDir(greenplum.MirrorRole, 3, "RandomTimestamp", "6.20.0")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -149,7 +149,7 @@ func TestRun(t *testing.T) {
 		upgrade.SetPgUpgradeCommand(exectest.NewCommand(upgrade.Success))
 		defer upgrade.ResetPgUpgradeCommand()
 
-		err := upgrade.Run(nil, nil, &idl.PgOptions{})
+		err := upgrade.Run(nil, nil, &idl.PgOptions{TargetVersion: "7.2.0"})
 		if !errors.Is(err, expected) {
 			t.Errorf("got error %#v want %#v", err, expected)
 		}
@@ -202,7 +202,7 @@ func TestRun(t *testing.T) {
 			t.Fatalf("unexpected error %+v", err)
 		}
 
-		expected, err := utils.GetPgUpgradeDir(greenplum.MirrorRole, 3, "RandomTimestamp")
+		expected, err := utils.GetPgUpgradeDir(greenplum.MirrorRole, 3, "RandomTimestamp", "6.20.0")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -300,7 +300,6 @@ func TestRun(t *testing.T) {
 				"--new-port", "7890",
 				"--mode", "dispatcher",
 				"--jobs", "",
-				"--output-dir", filepath.Join(logDir, "pg_upgrade_RandomTimestamp", "p3"),
 				"--verbose",
 				"--check", "--continue-check-on-fatal",
 				"--link",
@@ -344,7 +343,6 @@ func TestRun(t *testing.T) {
 				"--new-port", "",
 				"--mode", "unknown_pgUpgradeMode",
 				"--jobs", "",
-				"--output-dir", filepath.Join(logDir, "pg_upgrade_RandomTimestamp", "p3"),
 				"--verbose",
 				"--old-tablespaces-file", utils.GetOldTablespacesFile(backupDir),
 				"--old-gp-dbid", "",
@@ -371,7 +369,6 @@ func TestRun(t *testing.T) {
 				"--new-port", "",
 				"--mode", "unknown_pgUpgradeMode",
 				"--jobs", "",
-				"--output-dir", filepath.Join(logDir, "pg_upgrade_RandomTimestamp", "p3"),
 				"--old-tablespaces-file", utils.GetOldTablespacesFile(backupDir),
 				"--old-gp-dbid", "",
 				"--new-gp-dbid", "",
@@ -396,7 +393,6 @@ func TestRun(t *testing.T) {
 				"--new-port", "",
 				"--mode", "unknown_pgUpgradeMode",
 				"--jobs", "",
-				"--output-dir", filepath.Join(logDir, "pg_upgrade_RandomTimestamp", "p3"),
 				"--old-tablespaces-file", utils.GetOldTablespacesFile(backupDir),
 				"--old-gp-dbid", "",
 				"--new-gp-dbid", "",
@@ -422,7 +418,6 @@ func TestRun(t *testing.T) {
 				"--new-port", "",
 				"--mode", "unknown_pgUpgradeMode",
 				"--jobs", "",
-				"--output-dir", filepath.Join(logDir, "pg_upgrade_RandomTimestamp", "p3"),
 				"--verbose",
 				"--skip-checks",
 				"--old-tablespaces-file", utils.GetOldTablespacesFile(backupDir),
@@ -451,7 +446,6 @@ func TestRun(t *testing.T) {
 				"--new-port", "",
 				"--mode", "unknown_pgUpgradeMode",
 				"--jobs", "",
-				"--output-dir", filepath.Join(logDir, "pg_upgrade_RandomTimestamp", "p3"),
 				"--old-tablespaces-file", utils.GetOldTablespacesFile(backupDir),
 				"--old-gp-dbid", "",
 				"--new-gp-dbid", "",
@@ -476,7 +470,6 @@ func TestRun(t *testing.T) {
 				"--new-port", "",
 				"--mode", "unknown_pgUpgradeMode",
 				"--jobs", "",
-				"--output-dir", filepath.Join(logDir, "pg_upgrade_RandomTimestamp", "p3"),
 				"--old-tablespaces-file", utils.GetOldTablespacesFile(backupDir),
 				"--old-gp-dbid", "",
 				"--new-gp-dbid", "",
@@ -503,7 +496,6 @@ func TestRun(t *testing.T) {
 				"--new-port", "",
 				"--mode", "unknown_pgUpgradeMode",
 				"--jobs", "",
-				"--output-dir", filepath.Join(logDir, "pg_upgrade_RandomTimestamp", "p3"),
 				"--check", "--continue-check-on-fatal",
 				"--old-gp-dbid", "",
 				"--new-gp-dbid", "",
@@ -529,7 +521,6 @@ func TestRun(t *testing.T) {
 				"--new-port", "",
 				"--mode", "unknown_pgUpgradeMode",
 				"--jobs", "",
-				"--output-dir", filepath.Join(logDir, "pg_upgrade_RandomTimestamp", "p3"),
 				"--old-tablespaces-file", utils.GetOldTablespacesFile(backupDir),
 				"--old-gp-dbid", "",
 				"--new-gp-dbid", "",
@@ -555,7 +546,6 @@ func TestRun(t *testing.T) {
 				"--new-port", "",
 				"--mode", "unknown_pgUpgradeMode",
 				"--jobs", "",
-				"--output-dir", filepath.Join(logDir, "pg_upgrade_RandomTimestamp", "p3"),
 				"--link",
 				"--old-tablespaces-file", utils.GetOldTablespacesFile(backupDir),
 				"--old-gp-dbid", "",
@@ -582,7 +572,6 @@ func TestRun(t *testing.T) {
 				"--new-port", "",
 				"--mode", "unknown_pgUpgradeMode",
 				"--jobs", "",
-				"--output-dir", filepath.Join(logDir, "pg_upgrade_RandomTimestamp", "p3"),
 				"--old-tablespaces-file", utils.GetOldTablespacesFile(backupDir),
 				"--old-gp-dbid", "",
 				"--new-gp-dbid", "",
@@ -608,7 +597,6 @@ func TestRun(t *testing.T) {
 				"--new-port", "",
 				"--mode", "unknown_pgUpgradeMode",
 				"--jobs", "",
-				"--output-dir", filepath.Join(logDir, "pg_upgrade_RandomTimestamp", "p-1"),
 				"--check", "--continue-check-on-fatal",
 				"--old-gp-dbid", "",
 				"--new-gp-dbid", "",
@@ -634,7 +622,6 @@ func TestRun(t *testing.T) {
 				"--new-port", "",
 				"--mode", "unknown_pgUpgradeMode",
 				"--jobs", "",
-				"--output-dir", filepath.Join(logDir, "pg_upgrade_RandomTimestamp", "p3"),
 				"--old-tablespaces-file", utils.GetOldTablespacesFile(backupDir),
 				"--old-gp-dbid", "",
 				"--new-gp-dbid", "",
@@ -660,7 +647,6 @@ func TestRun(t *testing.T) {
 				"--new-port", "",
 				"--mode", "unknown_pgUpgradeMode",
 				"--jobs", "",
-				"--output-dir", filepath.Join(logDir, "pg_upgrade_RandomTimestamp", "p3"),
 				"--old-tablespaces-file", utils.GetOldTablespacesFile(backupDir),
 				"--old-gp-dbid", "0",
 				"--new-gp-dbid", "1",
@@ -713,7 +699,6 @@ func TestRun(t *testing.T) {
 				"--new-port", "",
 				"--mode", "unknown_pgUpgradeMode",
 				"--jobs", "",
-				"--output-dir", filepath.Join(logDir, "pg_upgrade_RandomTimestamp", "p3"),
 				"--old-tablespaces-file", utils.GetOldTablespacesFile(backupDir),
 				"--old-gp-dbid", "",
 				"--new-gp-dbid", "",
@@ -738,7 +723,6 @@ func TestRun(t *testing.T) {
 				"--new-port", "",
 				"--mode", "unknown_pgUpgradeMode",
 				"--jobs", "123",
-				"--output-dir", filepath.Join(logDir, "pg_upgrade_RandomTimestamp", "p3"),
 				"--old-tablespaces-file", utils.GetOldTablespacesFile(backupDir),
 				"--old-gp-dbid", "",
 				"--new-gp-dbid", "",
@@ -749,6 +733,52 @@ func TestRun(t *testing.T) {
 				ContentID:          3,
 				TargetVersion:      "6.20.0",
 				PgUpgradeJobs:      "123",
+				PgUpgradeTimestamp: "RandomTimestamp",
+			},
+		},
+		{
+			name:        "--output-dir is not set when version is lower than 7.0.0",
+			expectedCmd: "pg_upgrade",
+			expectedArgs: []string{"--retain", "--progress",
+				"--old-bindir", "",
+				"--new-bindir", "",
+				"--old-datadir", "",
+				"--new-datadir", "",
+				"--old-port", "",
+				"--new-port", "",
+				"--mode", "unknown_pgUpgradeMode",
+				"--jobs", "",
+				"--old-tablespaces-file", utils.GetOldTablespacesFile(backupDir),
+				"--old-gp-dbid", "",
+				"--new-gp-dbid", "",
+			},
+			opts: &idl.PgOptions{
+				BackupDir:          backupDir,
+				Role:               greenplum.PrimaryRole,
+				ContentID:          3,
+				TargetVersion:      "6.20.0",
+				PgUpgradeTimestamp: "RandomTimestamp",
+			},
+		},
+		{
+			name:        "--output-dir is set when version is at least 7.0.0",
+			expectedCmd: "pg_upgrade",
+			expectedArgs: []string{"--retain", "--progress",
+				"--old-bindir", "",
+				"--new-bindir", "",
+				"--old-datadir", "",
+				"--new-datadir", "",
+				"--old-port", "",
+				"--new-port", "",
+				"--mode", "unknown_pgUpgradeMode",
+				"--jobs", "",
+				"--output-dir", filepath.Join(logDir, "pg_upgrade_RandomTimestamp", "p3"),
+			},
+			opts: &idl.PgOptions{
+				BackupDir:          backupDir,
+				Role:               greenplum.PrimaryRole,
+				ContentID:          3,
+				TargetVersion:      "7.1.0",
 				PgUpgradeTimestamp: "RandomTimestamp",
 			},
 		},

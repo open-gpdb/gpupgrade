@@ -397,12 +397,22 @@ func Jq(t *testing.T, file string, args ...string) string {
 func MustGetPgUpgradeLog(t *testing.T, contentID int32) string {
 	t.Helper()
 
-	dir, err := utils.GetPgUpgradeDir(greenplum.PrimaryRole, contentID, "RandomTimestamp")
+	// TODO: we'll need to update this logic once we have fix the GP6 to GP7 pipeline
+	targetVersion := "6.20.0"
+	dir, err := utils.GetPgUpgradeDir(greenplum.PrimaryRole, contentID, "*", targetVersion)
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}
 
-	return filepath.Join(dir, "pg_upgrade_internal.log")
+	matches, err := filepath.Glob(dir)
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+
+	if semver.MustParse(targetVersion).Major < 7 {
+		return filepath.Join(matches[0], "pg_upgrade_internal.log")
+	}
+	return filepath.Join(matches[0], "log", "pg_upgrade_internal.log")
 }
 
 func GetStatUtility() string {

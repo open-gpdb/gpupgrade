@@ -93,7 +93,7 @@ func TestUpgradeCoordinator(t *testing.T) {
 
 	now := time.Now()
 	pgUpgradeTimestamp := now.Format(hub.TimeStringFormat)
-	pgUpgradeDir, err := utils.GetPgUpgradeDir(greenplum.PrimaryRole, -1, pgUpgradeTimestamp)
+	pgUpgradeDir, err := utils.GetPgUpgradeDir(greenplum.PrimaryRole, -1, pgUpgradeTimestamp, "6.15.0")
 	if err != nil {
 		t.Fatal(err)
 	}

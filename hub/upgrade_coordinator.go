@@ -64,7 +64,7 @@ func UpgradeCoordinator(streams step.OutStreams, backupDir string, pgUpgradeVerb
 			return xerrors.Errorf("%s master: %v", action, err)
 		}
 
-		pgUpgradeDir, dirErr := utils.GetPgUpgradeDir(opts.GetRole(), opts.GetContentID(), opts.GetPgUpgradeTimeStamp())
+		pgUpgradeDir, dirErr := utils.GetPgUpgradeDir(opts.GetRole(), opts.GetContentID(), opts.GetPgUpgradeTimeStamp(), opts.GetTargetVersion())
 		if dirErr != nil {
 			err = errorlist.Append(err, dirErr)
 		}

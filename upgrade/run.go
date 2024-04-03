@@ -27,6 +27,7 @@ func Run(stdout, stderr io.Writer, opts *idl.PgOptions) error {
 		opts.GetRole(),
 		opts.GetContentID(),
 		opts.GetPgUpgradeTimeStamp(),
+		opts.GetTargetVersion(),
 	)
 	if err != nil {
 		return err
@@ -48,7 +49,11 @@ func Run(stdout, stderr io.Writer, opts *idl.PgOptions) error {
 		"--new-port", opts.GetNewPort(),
 		"--mode", opts.GetPgUpgradeMode().String(),
 		"--jobs", opts.GetPgUpgradeJobs(),
-		"--output-dir", upgradeDir,
+	}
+
+	// TODO: Update this to at least 7.2.0 once it's released
+	if semver.MustParse(opts.GetTargetVersion()).Major >= 7 {
+		args = append(args, "--output-dir", upgradeDir)
 	}
 
 	if opts.GetPgUpgradeVerbose() {

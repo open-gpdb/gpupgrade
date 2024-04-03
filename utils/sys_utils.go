@@ -15,6 +15,8 @@ import (
 	"sort"
 	"time"
 
+	"github.com/blang/semver/v4"
+
 	"github.com/fatih/color"
 	"github.com/google/renameio"
 
@@ -134,10 +136,14 @@ func GetInitsystemConfig() string {
 	return filepath.Join(GetStateDir(), "gpinitsystem_config")
 }
 
-func GetPgUpgradeDir(role string, contentID int32, pgUpgradeTimeStamp string) (string, error) {
+func GetPgUpgradeDir(role string, contentID int32, pgUpgradeTimeStamp string, targetVersion string) (string, error) {
 	logDir, err := GetLogDir()
 	if err != nil {
 		return "", err
+	}
+
+	if semver.MustParse(targetVersion).Major < 7 {
+		return filepath.Join(logDir, "pg_upgrade", fmt.Sprintf(role+"%d", contentID)), nil
 	}
 
 	return filepath.Join(logDir, fmt.Sprintf("pg_upgrade_%s", pgUpgradeTimeStamp), fmt.Sprintf(role+"%d", contentID)), nil
