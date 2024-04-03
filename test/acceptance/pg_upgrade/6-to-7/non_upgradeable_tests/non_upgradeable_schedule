@@ -7,3 +7,4 @@ test: views_with_removed_operators
 test: views_with_removed_functions
 test: views_with_removed_types
 test: disallowed_pg_operator
+test: views_with_changed_function_signatures

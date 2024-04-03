@@ -1,0 +1,107 @@
+-- Copyright (c) 2017-2024 VMware, Inc. or its affiliates
+-- SPDX-License-Identifier: Apache-2.0
+
+--------------------------------------------------------------------------------
+-- Create and setup non-upgradeable objects
+--------------------------------------------------------------------------------
+
+DROP SCHEMA IF EXISTS functions_with_changed_signature CASCADE;
+DROP SCHEMA
+CREATE SCHEMA functions_with_changed_signature;
+CREATE SCHEMA
+SET search_path to functions_with_changed_signature;
+SET
+
+CREATE TABLE ao_table(i int) with (appendonly=true);
+CREATE TABLE
+CREATE TABLE aoco_table(i int) with (appendonly=true, orientation=column);
+CREATE TABLE
+INSERT INTO ao_table SELECT generate_series(1,10);
+INSERT 0 10
+INSERT INTO aoco_table SELECT generate_series(1,10);
+INSERT 0 10
+
+CREATE VIEW v01 AS SELECT * FROM gp_toolkit.__gp_aocsseg('aoco_table');
+CREATE VIEW
+CREATE VIEW v02 AS SELECT * FROM gp_toolkit.__gp_aocsseg_history('aoco_table');
+CREATE VIEW
+CREATE VIEW v03 AS SELECT * FROM gp_toolkit.__gp_aoseg('ao_table');
+CREATE VIEW
+CREATE VIEW v04 AS SELECT * FROM gp_toolkit.__gp_aoseg_history('ao_table');
+CREATE VIEW
+CREATE VIEW v05 AS SELECT * FROM pg_catalog.pg_create_logical_replication_slot('orig_slot1', 'slot_test');
+CREATE VIEW
+CREATE VIEW v06 AS SELECT * FROM pg_catalog.pg_create_physical_replication_slot('orig_slot1', true);
+CREATE VIEW
+CREATE VIEW v07 AS SELECT * FROM pg_catalog.gp_dist_wait_status();
+CREATE VIEW
+CREATE VIEW v08 AS SELECT * FROM pg_catalog.gp_execution_segment();
+CREATE VIEW
+CREATE VIEW v09 AS SELECT * FROM pg_catalog.gp_request_fts_probe_scan();
+CREATE VIEW
+CREATE VIEW v10 AS SELECT * FROM pg_catalog.pg_show_all_settings();
+CREATE VIEW
+CREATE VIEW v11 AS SELECT * FROM pg_catalog.pg_start_backup('testbackup');
+CREATE VIEW
+CREATE VIEW v12 AS SELECT * FROM pg_catalog.pg_stat_get_wal_senders();
+CREATE VIEW
+CREATE VIEW v13 AS SELECT * FROM pg_catalog.pg_stat_get_activity(NULL);
+CREATE VIEW
+
+---------------------------------------------------------------------------------
+--- Assert that pg_upgrade --check correctly detects the non-upgradeable objects
+---------------------------------------------------------------------------------
+!\retcode gpupgrade initialize --source-gphome="${GPHOME_SOURCE}" --target-gphome=${GPHOME_TARGET} --source-master-port=${PGPORT} --disk-free-ratio 0 --non-interactive;
+-- start_ignore
+-- end_ignore
+(exited with code 1)
+! cat ~/gpAdminLogs/gpupgrade/pg_upgrade/p-1/views_with_changed_function_signatures.txt;
+Database: isolation2test
+  functions_with_changed_signature.v01
+  functions_with_changed_signature.v02
+  functions_with_changed_signature.v03
+  functions_with_changed_signature.v04
+  functions_with_changed_signature.v05
+  functions_with_changed_signature.v06
+  functions_with_changed_signature.v07
+  functions_with_changed_signature.v08
+  functions_with_changed_signature.v09
+  functions_with_changed_signature.v10
+  functions_with_changed_signature.v11
+  functions_with_changed_signature.v12
+  functions_with_changed_signature.v13
+
+
+---------------------------------------------------------------------------------
+--- Cleanup
+---------------------------------------------------------------------------------
+DROP VIEW v13;
+DROP VIEW
+DROP VIEW v12;
+DROP VIEW
+DROP VIEW v11;
+DROP VIEW
+DROP VIEW v10;
+DROP VIEW
+DROP VIEW v09;
+DROP VIEW
+DROP VIEW v08;
+DROP VIEW
+DROP VIEW v07;
+DROP VIEW
+DROP VIEW v06;
+DROP VIEW
+DROP VIEW v05;
+DROP VIEW
+DROP VIEW v04;
+DROP VIEW
+DROP VIEW v03;
+DROP VIEW
+DROP VIEW v02;
+DROP VIEW
+DROP VIEW v01;
+DROP VIEW
+DROP TABLE aoco_table;
+DROP TABLE
+DROP TABLE ao_table;
+DROP TABLE
