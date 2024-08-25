@@ -11,8 +11,9 @@ import (
 
 // Change these values to bump the minimum supported versions and associated tests.
 const min5xVersion = "5.29.10"
-const min6xVersion = "6.25.0"
+const min6xVersion = "6.0.0"
 const min7xVersion = "7.0.0"
+const minCloudberryVersion = "1.0.0"
 
 var GetSourceVersion = Version
 var GetTargetVersion = Version
@@ -51,6 +52,11 @@ func validate(sourceVersion semver.Version, targetVersion semver.Version) error 
 		targetRange = semver.MustParseRange(">=" + min7xVersion + " <8.0.0")
 		minSourceVersion = min6xVersion
 		minTargetVersion = min7xVersion
+	case sourceVersion.Major == 6 && targetVersion.Major == 1:
+		sourceRange = semver.MustParseRange(">=" + min6xVersion + " <7.0.0")
+		targetRange = semver.MustParseRange(">=" + minCloudberryVersion + " <5.0.0")
+		minSourceVersion = min6xVersion
+		minTargetVersion = minCloudberryVersion
 	case sourceVersion.Major == 7 && targetVersion.Major == 7:
 		sourceRange = semver.MustParseRange(">=" + min7xVersion + " <8.0.0")
 		targetRange = semver.MustParseRange(">=" + min7xVersion + " <8.0.0")
@@ -59,7 +65,7 @@ func validate(sourceVersion semver.Version, targetVersion semver.Version) error 
 	default:
 		return fmt.Errorf("Unsupported source and target versions. "+
 			"Found source version %s and target version %s. "+
-			"Upgrade is only supported for Greenplum 5 to 6 and Greenplum 6 to 7. "+
+			"Upgrade is only supported for Greenplum 5 to 6, Greenplum 6 to 7 and Greenplum 6 to Cloudberry 1.0.0+ "+
 			"Check the documentation for further information.", sourceVersion, targetVersion)
 	}
 
