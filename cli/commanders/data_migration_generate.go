@@ -48,6 +48,11 @@ func GenerateDataMigrationScripts(streams step.OutStreams, nonInteractive bool, 
 		return fmt.Errorf("failed to find seed scripts for Greenplum version %s under %q", version, seedDir)
 	}
 
+	_, err = fmt.Fprintf(streams.Stdout(), "\nGenerating data migration scripts for %v dir...\n", seedDir)
+	if err != nil {
+		return err
+	}
+
 	db, err := bootstrapConnectionFunc(idl.ClusterDestination_source, gphome, port)
 	if err != nil {
 		return err
