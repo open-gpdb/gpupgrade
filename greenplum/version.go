@@ -43,7 +43,7 @@ func Version(gphome string) (semver.Version, error) {
 	parts := strings.SplitN(strings.TrimSpace(rawVersion), "postgres (Greenplum Database) ", 2)
 	if len(parts) != 2 {
 
-		parts = strings.SplitN(strings.TrimSpace(rawVersion), "postgres (Cloudberry Database) ", 2)
+		parts = strings.SplitN(strings.TrimSpace(rawVersion), "postgres (Apache Cloudberry) ", 2)
 
 		if len(parts) != 2 {
 			return semver.Version{}, xerrors.Errorf(`Greenplum version %q is not of the form "postgres (Greenplum/Cloudberry Database) #.#.#"`, rawVersion)

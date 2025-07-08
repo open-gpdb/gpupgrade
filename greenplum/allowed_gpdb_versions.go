@@ -52,7 +52,7 @@ func validate(sourceVersion semver.Version, targetVersion semver.Version) error 
 		targetRange = semver.MustParseRange(">=" + min7xVersion + " <8.0.0")
 		minSourceVersion = min6xVersion
 		minTargetVersion = min7xVersion
-	case sourceVersion.Major == 6 && targetVersion.Major == 1:
+	case sourceVersion.Major == 6 && targetVersion.Major >= 1 && targetVersion.Major < 5:
 		sourceRange = semver.MustParseRange(">=" + min6xVersion + " <7.0.0")
 		targetRange = semver.MustParseRange(">=" + minCloudberryVersion + " <5.0.0")
 		minSourceVersion = min6xVersion
