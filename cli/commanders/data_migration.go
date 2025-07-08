@@ -57,6 +57,7 @@ func ApplySQLFile(gphome string, port int, database string, path string, args ..
 	args = append(args,
 		"--no-psqlrc", "--quiet",
 		"-d", database,
+		"-h", "localhost",
 		"-p", strconv.Itoa(port),
 		"-f", path)
 
