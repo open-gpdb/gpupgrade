@@ -1,0 +1,14 @@
+#!/usr/bin/make -f
+%:
+	dh \$@
+
+override_dh_auto_build:
+	make
+
+override_dh_auto_test:
+
+override_dh_auto_install:
+	echo \$(PWD)
+	mkdir -p \$(PWD)/debian/build
+	cp \$(PWD)/gpupgrade \$(PWD)/debian/build
+

@@ -1,0 +1,14 @@
+Source: gpupgrade
+Section: database
+Priority: optional
+Maintainer: Kirill Reshke <reshke@yandex-team.ru>
+Build-Depends: 
+Standards-Version: 3.8.0
+Homepage: https://github.com/open-gpdb/gpupgrade
+
+Package: gpupgrade
+Conflicts: 
+Architecture: any
+Depends: 
+Description: gpupgrade
+
