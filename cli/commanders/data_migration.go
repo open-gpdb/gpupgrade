@@ -29,6 +29,7 @@ func ResetPsqlCommand() {
 func executeSQLCommand(gphome string, port int, database string, sql string) ([]byte, error) {
 	cmd := psqlCommand(filepath.Join(gphome, "bin", "psql"), "--no-psqlrc", "--quiet",
 		"-d", database,
+		"-h", "localhost",
 		"-p", strconv.Itoa(port),
 		"-c", sql)
 	cmd.Env = []string{}
