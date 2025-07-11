@@ -11,4 +11,4 @@ override_dh_auto_install:
 	echo \$(PWD)
 	mkdir -p \$(PWD)/debian/build
 	cp \$(PWD)/gpupgrade \$(PWD)/debian/build
-	cp \$(PWD)/data-migration-scripts \$(PWD)/debian/build
+	cp -r \$(PWD)/data-migration-scripts \$(PWD)/debian/build
