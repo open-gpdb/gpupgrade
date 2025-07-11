@@ -1,1 +1,2 @@
 debian/build/* /usr/bin
+debian/build/data-migration-scripts /usr/local/bin/greenplum/gpupgrade/
