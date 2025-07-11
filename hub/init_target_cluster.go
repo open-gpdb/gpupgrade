@@ -92,7 +92,7 @@ func InitTargetCluster(stream step.OutStreams, intermediate *greenplum.Cluster) 
 	})
 
 	args := []string{"-a", "-I", utils.GetInitsystemConfig()}
-	if intermediate.Version.Major < 7 {
+	if intermediate.Version.Major >= 5 && intermediate.Version.Major < 7 {
 		// For 6X we add --ignore-warnings to gpinitsystem to return 0 on
 		// warnings and 1 on errors. 7X and later does this by default.
 		args = append(args, "--ignore-warnings")
