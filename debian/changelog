@@ -1,4 +1,4 @@
-spqr (SPQR_VERSION) stable; urgency=low
+gpupgrade (GPUPGRADE_VERSION) stable; urgency=low
 
   * Package build
 
