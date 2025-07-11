@@ -78,7 +78,7 @@ func Run(stdout, stderr io.Writer, opts *idl.PgOptions) error {
 	}
 
 	// Below 7X, specify the dbid's for upgrading tablespaces.
-	if semver.MustParse(opts.GetTargetVersion()).Major < 7 {
+	if semver.MustParse(opts.GetTargetVersion()).Major < 7 && semver.MustParse(opts.GetTargetVersion()).Major >= 5 {
 		if opts.GetAction() != idl.PgOptions_check {
 			args = append(args, "--old-tablespaces-file", utils.GetOldTablespacesFile(opts.GetBackupDir()))
 		}
