@@ -29,6 +29,7 @@ func TestQueryPgStatActivity(t *testing.T) {
 		{DbID: 6, ContentID: 1, Hostname: "sdw1", DataDir: "/data/dbfast_mirror2/seg2", Port: 25436, Role: greenplum.MirrorRole},
 	})
 	target.Destination = idl.ClusterDestination_intermediate
+	target.Product = greenplum.ProductGreenplum
 	target.Version = semver.MustParse("6.0.0")
 
 	db, mock, err := sqlmock.New()
