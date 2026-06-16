@@ -25,6 +25,7 @@ func TestWaitForSegments(t *testing.T) {
 		{DbID: 5, ContentID: 1, Hostname: "sdw2", DataDir: "/data/dbfast2/seg2", Port: 25435, Role: greenplum.PrimaryRole},
 		{DbID: 6, ContentID: 1, Hostname: "sdw1", DataDir: "/data/dbfast_mirror2/seg2", Port: 25436, Role: greenplum.MirrorRole},
 	})
+	target.Product = greenplum.ProductGreenplum
 
 	db, mock, err := sqlmock.New()
 	if err != nil {
@@ -37,7 +38,7 @@ func TestWaitForSegments(t *testing.T) {
 
 		expectFtsProbe(mock)
 		expectGpSegmentConfigurationToReturn(mock, 4)
-		expectPgStatReplicationToReturn(mock, 1, target.Version)
+		expectPgStatReplicationToReturn(mock, 1, target)
 
 		err = greenplum.WaitForSegments(db, timeout, target)
 		if err != nil {
@@ -49,7 +50,7 @@ func TestWaitForSegments(t *testing.T) {
 		target.Version = semver.MustParse("5.0.0")
 
 		expectGpSegmentConfigurationToReturn(mock, 4)
-		expectPgStatReplicationToReturn(mock, 1, target.Version)
+		expectPgStatReplicationToReturn(mock, 1, target)
 
 		err = greenplum.WaitForSegments(db, timeout, target)
 		if err != nil {
@@ -65,6 +66,7 @@ func TestWaitForSegments(t *testing.T) {
 			{DbID: 5, ContentID: 1, Hostname: "sdw2", DataDir: "/data/dbfast2/seg2", Port: 25435, Role: greenplum.PrimaryRole},
 			{DbID: 6, ContentID: 1, Hostname: "sdw1", DataDir: "/data/dbfast_mirror2/seg2", Port: 25436, Role: greenplum.MirrorRole},
 		})
+		target.Product = greenplum.ProductGreenplum
 		target.Version = semver.MustParse("6.0.0")
 
 		expectFtsProbe(mock)
@@ -83,11 +85,12 @@ func TestWaitForSegments(t *testing.T) {
 			{DbID: 3, ContentID: 0, Hostname: "sdw1", DataDir: "/data/dbfast1/seg1", Port: 25433, Role: greenplum.PrimaryRole},
 			{DbID: 5, ContentID: 1, Hostname: "sdw2", DataDir: "/data/dbfast2/seg2", Port: 25435, Role: greenplum.PrimaryRole},
 		})
+		target.Product = greenplum.ProductGreenplum
 		target.Version = semver.MustParse("6.0.0")
 
 		expectFtsProbe(mock)
 		expectGpSegmentConfigurationWithoutMirrorsToReturn(mock, 2)
-		expectPgStatReplicationToReturn(mock, 1, target.Version)
+		expectPgStatReplicationToReturn(mock, 1, target)
 
 		err = greenplum.WaitForSegments(db, timeout, target)
 		if err != nil {
@@ -101,6 +104,7 @@ func TestWaitForSegments(t *testing.T) {
 			{DbID: 3, ContentID: 0, Hostname: "sdw1", DataDir: "/data/dbfast1/seg1", Port: 25433, Role: greenplum.PrimaryRole},
 			{DbID: 5, ContentID: 1, Hostname: "sdw2", DataDir: "/data/dbfast2/seg2", Port: 25435, Role: greenplum.PrimaryRole},
 		})
+		target.Product = greenplum.ProductGreenplum
 		target.Version = semver.MustParse("6.0.0")
 
 		expectFtsProbe(mock)
@@ -119,10 +123,10 @@ func TestWaitForSegments(t *testing.T) {
 		expectGpSegmentConfigurationToReturn(mock, 0)
 		expectFtsProbe(mock)
 		expectGpSegmentConfigurationToReturn(mock, 4)
-		expectPgStatReplicationToReturn(mock, 0, target.Version)
+		expectPgStatReplicationToReturn(mock, 0, target)
 		expectFtsProbe(mock)
 		expectGpSegmentConfigurationToReturn(mock, 4)
-		expectPgStatReplicationToReturn(mock, 1, target.Version)
+		expectPgStatReplicationToReturn(mock, 1, target)
 
 		err = greenplum.WaitForSegments(db, timeout, target)
 		if err != nil {
@@ -137,10 +141,30 @@ func TestWaitForSegments(t *testing.T) {
 		expectGpSegmentConfigurationToReturn(mock, 0)
 		expectFtsProbe(mock)
 		expectGpSegmentConfigurationToReturn(mock, 4)
-		expectPgStatReplicationToReturn(mock, 0, target.Version)
+		expectPgStatReplicationToReturn(mock, 0, target)
 		expectFtsProbe(mock)
 		expectGpSegmentConfigurationToReturn(mock, 4)
-		expectPgStatReplicationToReturn(mock, 1, target.Version)
+		expectPgStatReplicationToReturn(mock, 1, target)
+
+		err = greenplum.WaitForSegments(db, timeout, target)
+		if err != nil {
+			t.Errorf("unexpected error: %#v", err)
+		}
+	})
+
+	t.Run("uses correct pg_stat_replication fields if target is Cloudberry", func(t *testing.T) {
+		target.Product = greenplum.ProductCloudberry
+		target.Version = semver.MustParse("2.0.0")
+		defer func() { target.Product = greenplum.ProductGreenplum }()
+
+		expectFtsProbe(mock)
+		expectGpSegmentConfigurationToReturn(mock, 0)
+		expectFtsProbe(mock)
+		expectGpSegmentConfigurationToReturn(mock, 4)
+		expectPgStatReplicationToReturn(mock, 0, target)
+		expectFtsProbe(mock)
+		expectGpSegmentConfigurationToReturn(mock, 4)
+		expectPgStatReplicationToReturn(mock, 1, target)
 
 		err = greenplum.WaitForSegments(db, timeout, target)
 		if err != nil {
@@ -179,9 +203,9 @@ WHERE content > -1 AND status = 'u' AND \(role = preferred_role\)`).
 		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(count))
 }
 
-func expectPgStatReplicationToReturn(mock sqlmock.Sqlmock, count int, version semver.Version) {
+func expectPgStatReplicationToReturn(mock sqlmock.Sqlmock, count int, cluster *greenplum.Cluster) {
 	whereClause := "sent_location = flush_location;"
-	if version.Major > 6 {
+	if cluster.PostgresMajorVersion() >= 10 {
 		whereClause = "sent_lsn = flush_lsn;"
 	}
 
