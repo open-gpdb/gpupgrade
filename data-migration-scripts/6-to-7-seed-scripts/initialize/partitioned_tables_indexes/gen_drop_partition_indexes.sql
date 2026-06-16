@@ -58,7 +58,7 @@ part_constraint AS
          ON (n.oid = cc.relnamespace)
 )
 SELECT
-   $$ DROP INDEX IF EXISTS $$ || pg_catalog.quote_ident(n.nspname) ||'.'|| pg_catalog.quote_ident(i.relname) || $$ ;$$
+   $$ DROP INDEX IF EXISTS $$ || pg_catalog.quote_ident(n.nspname) ||'.'|| pg_catalog.quote_ident(i.relname) || $$ CASCADE ;$$
 FROM
    pg_index x
    JOIN
@@ -77,8 +77,22 @@ FROM
       pg_tablespace t
       ON t.oid = i.reltablespace
 WHERE
-   y.relkind = 'r'::"char"
-   AND i.relkind = 'i'::"char"
+   -- include both heap partition tables ('r') and partitioned roots ('p')
+   y.relkind IN ('r'::"char", 'p'::"char")
+   -- include both plain indexes ('i') and partitioned (parent) indexes ('I')
+   AND i.relkind IN ('i'::"char", 'I'::"char")
+   -- Skip indexes that are attached children of a partitioned (parent) index.
+   -- They cannot be dropped directly; they are removed automatically when the
+   -- parent index is dropped, and the parent itself is emitted by this query.
+   AND NOT EXISTS
+   (
+      SELECT 1
+      FROM pg_inherits inh
+      JOIN pg_class parent_idx
+         ON parent_idx.oid = inh.inhparent
+      WHERE inh.inhrelid = i.oid
+        AND parent_idx.relkind = 'I'::"char"
+   )
    AND
    (
       i.relname,
