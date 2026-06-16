@@ -95,7 +95,7 @@ if res1 is not None:
             plpy.error("Cannot read partition name or rank {0}".format(parentpartitiontablename))
 
         swap_sql = swap_sql + """
-CREATE TABLE __gpupgrade_tmp_executor.scratch_table (LIKE {schemaname}.{childrelname} INCLUDING CONSTRAINTS INCLUDING DEFAULTS);
+CREATE TABLE __gpupgrade_tmp_executor.scratch_table (LIKE {schemaname}.{childrelname} INCLUDING CONSTRAINTS INCLUDING DEFAULTS INCLUDING INDEXES);
 ALTER TABLE __gpupgrade_tmp_executor.scratch_table OWNER TO {childrelowner};
 ALTER TABLE {schemaname}.{parrelname} {partition_sql} {exchange_sql} WITH TABLE __gpupgrade_tmp_executor.scratch_table;
 DROP TABLE __gpupgrade_tmp_executor.scratch_table;
