@@ -14,7 +14,9 @@ import (
 func WaitForSegments(db *sql.DB, timeout time.Duration, cluster *Cluster) error {
 	startTime := time.Now()
 	for {
-		if cluster.Version.Major > 5 {
+		// gp_request_fts_probe_scan exists from GPDB6 (PostgreSQL 9) onward,
+		// including all Cloudberry releases; GPDB5 (PostgreSQL 8) lacks it.
+		if cluster.PostgresMajorVersion() >= 9 {
 			rows, err := db.Query("SELECT gp_request_fts_probe_scan();")
 			if err != nil {
 				return xerrors.Errorf("requesting gp_request_fts_probe_scan: %w", err)
@@ -72,8 +74,11 @@ WHERE content > -1 AND status = 'u' AND (role = preferred_role) ` + whereClause)
 		return true, nil
 	}
 
+	// PostgreSQL 10 renamed the pg_stat_replication *_location columns to *_lsn.
+	// GPDB7 (PG12) and all Cloudberry releases use the LSN names; GPDB6 (PG9)
+	// still uses the location names.
 	whereClause = "sent_location = flush_location;"
-	if cluster.Version.Major > 6 {
+	if cluster.PostgresMajorVersion() >= 10 {
 		whereClause = "sent_lsn = flush_lsn;"
 	}
 
