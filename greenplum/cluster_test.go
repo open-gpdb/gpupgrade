@@ -167,6 +167,32 @@ func TestPrimaryHostnames(t *testing.T) {
 	})
 }
 
+func TestPostgresMajorVersion(t *testing.T) {
+	cases := []struct {
+		name     string
+		product  greenplum.Product
+		version  string
+		expected int
+	}{
+		{"Greenplum 5", greenplum.ProductGreenplum, "5.0.0", 8},
+		{"Greenplum 6", greenplum.ProductGreenplum, "6.0.0", 9},
+		{"Greenplum 7", greenplum.ProductGreenplum, "7.0.0", 12},
+		{"Cloudberry 2", greenplum.ProductCloudberry, "2.0.0", 14},
+		{"Cloudberry 3", greenplum.ProductCloudberry, "3.0.0", 16},
+		{"future Cloudberry", greenplum.ProductCloudberry, "5.0.0", 12},
+		{"legacy config", greenplum.ProductUnknown, "6.0.0", 9},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			cluster := greenplum.Cluster{Product: c.product, Version: semver.MustParse(c.version)}
+			if actual := cluster.PostgresMajorVersion(); actual != c.expected {
+				t.Errorf("got %d, want %d", actual, c.expected)
+			}
+		})
+	}
+}
+
 func TestClusterFromDB(t *testing.T) {
 	testStateDir, err := os.MkdirTemp("", "")
 	if err != nil {
@@ -251,6 +277,7 @@ func TestClusterFromDB(t *testing.T) {
 		expectedCluster := testutils.MockCluster()
 		expectedCluster.Destination = destination
 		expectedCluster.Version = version
+		expectedCluster.Product = greenplum.ProductGreenplum
 		expectedCluster.GPHome = gphome
 
 		if !reflect.DeepEqual(&actualCluster, expectedCluster) {

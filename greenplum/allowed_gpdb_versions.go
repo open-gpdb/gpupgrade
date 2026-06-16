@@ -13,51 +13,51 @@ import (
 const min5xVersion = "5.29.10"
 const min6xVersion = "6.0.0"
 const min7xVersion = "7.0.0"
-const minCloudberryVersion = "1.0.0"
+const minCloudberryVersion = "2.0.0"
 
-var GetSourceVersion = Version
-var GetTargetVersion = Version
+var GetSourceVersion = VersionWithProduct
+var GetTargetVersion = VersionWithProduct
 
 func VerifyCompatibleGPDBVersions(sourceGPHome, targetGPHome string) error {
-	sourceVersion, err := GetSourceVersion(sourceGPHome)
+	sourceProduct, sourceVersion, err := GetSourceVersion(sourceGPHome)
 	if err != nil {
 		return err
 	}
 
-	targetVersion, err := GetTargetVersion(targetGPHome)
+	targetProduct, targetVersion, err := GetTargetVersion(targetGPHome)
 	if err != nil {
 		return err
 	}
 
-	return validate(sourceVersion, targetVersion)
+	return validate(sourceProduct, sourceVersion, targetProduct, targetVersion)
 }
 
-func validate(sourceVersion semver.Version, targetVersion semver.Version) error {
+func validate(sourceProduct Product, sourceVersion semver.Version, targetProduct Product, targetVersion semver.Version) error {
 	var sourceRange, targetRange semver.Range
 	var minSourceVersion, minTargetVersion string
 
 	switch {
-	case sourceVersion.Major == 5 && targetVersion.Major == 6:
+	case sourceProduct == ProductGreenplum && targetProduct == ProductGreenplum && sourceVersion.Major == 5 && targetVersion.Major == 6:
 		sourceRange = semver.MustParseRange(">=" + min5xVersion + " <6.0.0")
 		targetRange = semver.MustParseRange(">=" + min6xVersion + " <7.0.0")
 		minSourceVersion = min5xVersion
 		minTargetVersion = min6xVersion
-	case sourceVersion.Major == 6 && targetVersion.Major == 6:
+	case sourceProduct == ProductGreenplum && targetProduct == ProductGreenplum && sourceVersion.Major == 6 && targetVersion.Major == 6:
 		sourceRange = semver.MustParseRange(">=" + min6xVersion + " <7.0.0")
 		targetRange = semver.MustParseRange(">=" + min6xVersion + " <7.0.0")
 		minSourceVersion = min6xVersion
 		minTargetVersion = min6xVersion
-	case sourceVersion.Major == 6 && targetVersion.Major == 7:
+	case sourceProduct == ProductGreenplum && targetProduct == ProductGreenplum && sourceVersion.Major == 6 && targetVersion.Major == 7:
 		sourceRange = semver.MustParseRange(">=" + min6xVersion + " <7.0.0")
 		targetRange = semver.MustParseRange(">=" + min7xVersion + " <8.0.0")
 		minSourceVersion = min6xVersion
 		minTargetVersion = min7xVersion
-	case sourceVersion.Major == 6 && targetVersion.Major >= 1 && targetVersion.Major < 5:
+	case sourceProduct == ProductGreenplum && targetProduct == ProductCloudberry && sourceVersion.Major == 6:
 		sourceRange = semver.MustParseRange(">=" + min6xVersion + " <7.0.0")
-		targetRange = semver.MustParseRange(">=" + minCloudberryVersion + " <5.0.0")
+		targetRange = semver.MustParseRange(">=" + minCloudberryVersion)
 		minSourceVersion = min6xVersion
 		minTargetVersion = minCloudberryVersion
-	case sourceVersion.Major == 7 && targetVersion.Major == 7:
+	case sourceProduct == ProductGreenplum && targetProduct == ProductGreenplum && sourceVersion.Major == 7 && targetVersion.Major == 7:
 		sourceRange = semver.MustParseRange(">=" + min7xVersion + " <8.0.0")
 		targetRange = semver.MustParseRange(">=" + min7xVersion + " <8.0.0")
 		minSourceVersion = min7xVersion
@@ -65,7 +65,7 @@ func validate(sourceVersion semver.Version, targetVersion semver.Version) error 
 	default:
 		return fmt.Errorf("Unsupported source and target versions. "+
 			"Found source version %s and target version %s. "+
-			"Upgrade is only supported for Greenplum 5 to 6, Greenplum 6 to 7 and Greenplum 6 to Cloudberry 1.0.0+ "+
+			"Upgrade is only supported for Greenplum 5 to 6, Greenplum 6 to 7 and Greenplum 6 to Cloudberry 2.0.0+ "+
 			"Check the documentation for further information.", sourceVersion, targetVersion)
 	}
 

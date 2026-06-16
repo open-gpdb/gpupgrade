@@ -4,6 +4,7 @@
 package greenplum_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/blang/semver/v4"
@@ -75,6 +76,12 @@ func TestConnection(t *testing.T) {
 			"postgresql://localhost:15432/template1?search_path=&gp_role=utility",
 		},
 		{
+			"uses modern utility mode parameter for Cloudberry",
+			semver.MustParse("2.0.0"),
+			[]greenplum.Option{greenplum.UtilityMode()},
+			"postgresql://localhost:15432/template1?search_path=&gp_role=utility",
+		},
+		{
 			"allow system table mods",
 			semver.MustParse("6.0.0"),
 			[]greenplum.Option{
@@ -101,6 +108,10 @@ func TestConnection(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			source.Version = c.version
+			source.Product = greenplum.ProductGreenplum
+			if strings.Contains(c.name, "Cloudberry") {
+				source.Product = greenplum.ProductCloudberry
+			}
 
 			actual := source.Connection(c.options...)
 			if actual != c.expected {

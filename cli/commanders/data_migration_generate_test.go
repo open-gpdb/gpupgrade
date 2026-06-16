@@ -266,7 +266,7 @@ func TestGenerateScriptsPerDatabase(t *testing.T) {
 				t.Errorf("got %q want %q", utility, expectedUtility)
 			}
 
-			actualSql := args[7:8]
+			actualSql := args[9:10]
 			if numCalls == 1 {
 				expected := []string{"CREATE LANGUAGE plpythonu;"}
 				if !reflect.DeepEqual(actualSql, expected) {
@@ -585,13 +585,13 @@ func TestGenerateScriptsPerPhase(t *testing.T) {
 				t.Errorf("got database %q, want %q", database, expectedDatabase)
 			}
 
-			port := args[9:10]
+			port := args[11:12]
 			expectedPort := []string{"123"}
 			if !reflect.DeepEqual(port, expectedPort) {
 				t.Errorf("got port %q, want %q", port, expectedPort)
 			}
 
-			seedScript := args[11:12]
+			seedScript := args[13:14]
 			expectedSeedScript := []string{filepath.Join(seedDir, phase.String(), "unique_primary_foreign_key_constraint", "migration_postgres_gen_drop_constraint_2_primary_unique.sql")}
 			if !reflect.DeepEqual(seedScript, expectedSeedScript) {
 				t.Errorf("got seed script %q, want %q", seedScript, expectedSeedScript)
