@@ -8,6 +8,7 @@ import (
 	"os/user"
 	"testing"
 
+	"github.com/blang/semver/v4"
 	"github.com/golang/mock/gomock"
 
 	"github.com/greenplum-db/gpupgrade/greenplum"
@@ -27,6 +28,9 @@ func TestCreateRecoveryConfOnSegments(t *testing.T) {
 		{DbID: 5, ContentID: 1, Hostname: "sdw2", DataDir: "/data/dbfast2/seg.HqtFHX54y0o.2", Port: 50436, Role: greenplum.PrimaryRole},
 		{DbID: 6, ContentID: 1, Hostname: "sdw1", DataDir: "/data/dbfast_mirror2/seg.HqtFHX54y0o.2", Port: 50437, Role: greenplum.MirrorRole},
 	})
+	// Greenplum 7 -> PostgreSQL 12, so the hub sends "12" as the target major.
+	intermediate.Product = greenplum.ProductGreenplum
+	intermediate.Version = semver.MustParse("7.0.0")
 
 	utils.System.Current = func() (*user.User, error) {
 		return &user.User{Username: "gpadmin"}, nil
@@ -50,6 +54,7 @@ func TestCreateRecoveryConfOnSegments(t *testing.T) {
 						PrimaryHost:   "sdw2",
 						PrimaryPort:   int32(50436),
 					}},
+				TargetPostgresMajor: 12,
 			},
 		).Return(&idl.CreateRecoveryConfReply{}, nil)
 
@@ -64,6 +69,7 @@ func TestCreateRecoveryConfOnSegments(t *testing.T) {
 						PrimaryHost:   "sdw1",
 						PrimaryPort:   int32(50434),
 					}},
+				TargetPostgresMajor: 12,
 			},
 		).Return(&idl.CreateRecoveryConfReply{}, nil)
 

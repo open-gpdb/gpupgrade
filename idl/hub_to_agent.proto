@@ -184,6 +184,10 @@ message CreateRecoveryConfRequest {
   }
 
   repeated Connection connections = 1;
+  // PostgreSQL major version of the target cluster (e.g. 9, 12, 14), computed
+  // hub-side from the product and version. The agent writes standby.signal +
+  // postgresql.auto.conf when this is >= 12, else the legacy recovery.conf.
+  int32 target_postgres_major = 2;
 }
 
 message CreateRecoveryConfReply{}
