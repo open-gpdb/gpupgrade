@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/blang/semver/v4"
 
 	"github.com/greenplum-db/gpupgrade/greenplum"
 	"github.com/greenplum-db/gpupgrade/hub"
@@ -45,6 +46,43 @@ func TestAddMirrorsToCatalog(t *testing.T) {
 			}
 
 			expectAddSegment(mock, mirror).WillReturnResult(sqlmock.NewResult(0, 1))
+		}
+
+		mock.ExpectCommit()
+
+		err = hub.AddMirrorsToGpSegmentConfiguration(db, target)
+		if err != nil {
+			t.Errorf("returned error %+v", err)
+		}
+	})
+
+	t.Run("populates warehouseid when the target is Cloudberry", func(t *testing.T) {
+		target := hub.MustCreateCluster(t, greenplum.SegConfigs{
+			{DbID: 1, ContentID: -1, Hostname: "coordinator", DataDir: "/data/qddir/seg.HqtFHX54y0o.-1", Port: 50432, Role: greenplum.PrimaryRole},
+			{DbID: 2, ContentID: -1, Hostname: "standby", DataDir: "/data/standby.HqtFHX54y0o", Port: 50433, Role: greenplum.MirrorRole},
+			{DbID: 3, ContentID: 0, Hostname: "sdw1", DataDir: "/data/dbfast1/seg.HqtFHX54y0o.1", Port: 50434, Role: greenplum.PrimaryRole},
+			{DbID: 4, ContentID: 0, Hostname: "sdw2", DataDir: "/data/dbfast_mirror1/seg.HqtFHX54y0o.1", Port: 50435, Role: greenplum.MirrorRole},
+		})
+		target.Version = semver.MustParse("2.0.0")
+		target.Product = greenplum.ProductCloudberry
+
+		db, mock, err := sqlmock.New()
+		if err != nil {
+			t.Fatalf("sqlmock: %v", err)
+		}
+		defer testutils.FinishMock(mock, t)
+		defer db.Close()
+
+		mock.MatchExpectationsInOrder(false) // since we iterate over maps for which golang does not guarantee order
+
+		mock.ExpectBegin()
+
+		for _, mirror := range target.Mirrors {
+			if mirror.IsStandby() {
+				continue
+			}
+
+			expectAddCloudberrySegment(mock, mirror).WillReturnResult(sqlmock.NewResult(0, 1))
 		}
 
 		mock.ExpectCommit()
@@ -164,5 +202,12 @@ func expectAddSegment(mock sqlmock.Sqlmock, seg greenplum.SegConfig) *sqlmock.Ex
 	return mock.ExpectExec("INSERT INTO gp_segment_configuration "+
 		"\\(dbid, content, role, preferred_role, mode, status, port, hostname, address, datadir\\) "+
 		"VALUES\\((.+), (.+), (.+), (.+), 'n', 'u', (.+), (.+), (.+), (.+)\\);").
+		WithArgs(seg.DbID, seg.ContentID, seg.Role, seg.Role, seg.Port, seg.Hostname, seg.Hostname, seg.DataDir)
+}
+
+func expectAddCloudberrySegment(mock sqlmock.Sqlmock, seg greenplum.SegConfig) *sqlmock.ExpectedExec {
+	return mock.ExpectExec("INSERT INTO gp_segment_configuration "+
+		"\\(dbid, content, role, preferred_role, mode, status, port, hostname, address, datadir, warehouseid\\) "+
+		"VALUES\\((.+), (.+), (.+), (.+), 'n', 'u', (.+), (.+), (.+), (.+), 0\\);").
 		WithArgs(seg.DbID, seg.ContentID, seg.Role, seg.Role, seg.Port, seg.Hostname, seg.Hostname, seg.DataDir)
 }

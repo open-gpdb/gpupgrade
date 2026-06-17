@@ -42,7 +42,7 @@ func AddMirrorsToGpSegmentConfiguration(db *sql.DB, intermediate *greenplum.Clus
 	}()
 
 	for _, seg := range intermediate.Mirrors.ExcludingStandby() {
-		if err := addSegment(tx, seg); err != nil {
+		if err := addSegment(tx, seg, intermediate.IsCloudberry()); err != nil {
 			return err
 		}
 	}
@@ -50,10 +50,23 @@ func AddMirrorsToGpSegmentConfiguration(db *sql.DB, intermediate *greenplum.Clus
 	return nil
 }
 
-func addSegment(tx *sql.Tx, seg greenplum.SegConfig) error {
-	result, err := tx.Exec("INSERT INTO gp_segment_configuration "+
-		"(dbid, content, role, preferred_role, mode, status, port, hostname, address, datadir) "+
-		"VALUES($1, $2, $3, $4, 'n', 'u', $5, $6, $7, $8);", seg.DbID, seg.ContentID, seg.Role, seg.Role, seg.Port, seg.Hostname, seg.Hostname, seg.DataDir)
+func addSegment(tx *sql.Tx, seg greenplum.SegConfig, isCloudberry bool) error {
+	// Cloudberry's gp_segment_configuration has a warehouseid column that
+	// Greenplum lacks. It has no SQL-level default, so omitting it leaves the
+	// row's warehouseid NULL, which prevents FTS from finding the mirror
+	// ("FTS cannot find dbid=N in gp_segment_configuration"). Insert the
+	// default warehouse id (0) explicitly for Cloudberry targets.
+	columns := "(dbid, content, role, preferred_role, mode, status, port, hostname, address, datadir"
+	values := "VALUES($1, $2, $3, $4, 'n', 'u', $5, $6, $7, $8"
+	if isCloudberry {
+		columns += ", warehouseid"
+		values += ", 0"
+	}
+	columns += ") "
+	values += ");"
+
+	result, err := tx.Exec("INSERT INTO gp_segment_configuration "+columns+values,
+		seg.DbID, seg.ContentID, seg.Role, seg.Role, seg.Port, seg.Hostname, seg.Hostname, seg.DataDir)
 	if err != nil {
 		return xerrors.Errorf("insert into gp_segment_configuration: %w", err)
 	}
