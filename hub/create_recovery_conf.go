@@ -36,7 +36,13 @@ func CreateRecoveryConfOnSegments(agentConns []*idl.Connection, intermediate *gr
 			connReqs = append(connReqs, connReq)
 		}
 
-		req := &idl.CreateRecoveryConfRequest{Connections: connReqs}
+		// Decide the recovery-config style hub-side, where the product is known,
+		// and send the target's PostgreSQL major version so the agent does not
+		// have to re-detect Greenplum vs Cloudberry from a version number.
+		req := &idl.CreateRecoveryConfRequest{
+			Connections:         connReqs,
+			TargetPostgresMajor: int32(intermediate.PostgresMajorVersion()),
+		}
 		_, err := conn.AgentClient.CreateRecoveryConf(context.Background(), req)
 		return err
 	}

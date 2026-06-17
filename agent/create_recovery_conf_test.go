@@ -8,6 +8,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/greenplum-db/gpupgrade/agent"
@@ -21,7 +22,7 @@ func TestCreateRecoveryConf(t *testing.T) {
 	testlog.SetupTestLogger()
 	agentServer := agent.New()
 
-	t.Run("creates recovery.conf", func(t *testing.T) {
+	t.Run("creates recovery.conf for GPDB 6", func(t *testing.T) {
 		mirrorDataDir := testutils.GetTempDir(t, "")
 
 		connReqs := []*idl.CreateRecoveryConfRequest_Connection{{
@@ -31,7 +32,10 @@ func TestCreateRecoveryConf(t *testing.T) {
 			PrimaryPort:   int32(123),
 		}}
 
-		_, err := agentServer.CreateRecoveryConf(context.Background(), &idl.CreateRecoveryConfRequest{Connections: connReqs})
+		_, err := agentServer.CreateRecoveryConf(context.Background(), &idl.CreateRecoveryConfRequest{
+			Connections:         connReqs,
+			TargetPostgresMajor: 9, // PostgreSQL 9 (GPDB 6) -> legacy recovery.conf
+		})
 		if err != nil {
 			t.Errorf("unexpected error %#v", err)
 		}
@@ -43,6 +47,45 @@ primary_slot_name = 'internal_wal_replication_slot'`
 
 		if contents != expected {
 			t.Errorf("got %q, want %q", contents, expected)
+		}
+	})
+
+	t.Run("creates standby.signal and postgresql.auto.conf for PG12+ (Cloudberry 3.0, GPDB 7+)", func(t *testing.T) {
+		mirrorDataDir := testutils.GetTempDir(t, "")
+
+		connReqs := []*idl.CreateRecoveryConfRequest_Connection{{
+			MirrorDataDir: mirrorDataDir,
+			User:          "gpadmin",
+			PrimaryHost:   "sdw1",
+			PrimaryPort:   int32(123),
+		}}
+
+		_, err := agentServer.CreateRecoveryConf(context.Background(), &idl.CreateRecoveryConfRequest{
+			Connections:         connReqs,
+			TargetPostgresMajor: 16, // PostgreSQL 16 (Cloudberry) -> standby.signal
+		})
+		if err != nil {
+			t.Errorf("unexpected error %#v", err)
+		}
+
+		standbySignalPath := filepath.Join(mirrorDataDir, "standby.signal")
+		if _, err := os.Stat(standbySignalPath); err != nil {
+			t.Errorf("standby.signal not created: %v", err)
+		}
+
+		autoconfPath := filepath.Join(mirrorDataDir, "postgresql.auto.conf")
+		contents := testutils.MustReadFile(t, autoconfPath)
+		expectedConninfo := "primary_conninfo = 'user=gpadmin host=sdw1 port=123 sslmode=disable sslcompression=1 krbsrvname=postgres application_name=gp_walreceiver'"
+		if !strings.Contains(contents, expectedConninfo) {
+			t.Errorf("postgresql.auto.conf missing primary_conninfo: got %q", contents)
+		}
+		if !strings.Contains(contents, "primary_slot_name = 'internal_wal_replication_slot'") {
+			t.Errorf("postgresql.auto.conf missing primary_slot_name: got %q", contents)
+		}
+		// recovery.conf must not exist for PG12+
+		recoveryConfPath := filepath.Join(mirrorDataDir, "recovery.conf")
+		if _, err := os.Stat(recoveryConfPath); err == nil {
+			t.Error("recovery.conf should not be created for PG12+ targets")
 		}
 	})
 
