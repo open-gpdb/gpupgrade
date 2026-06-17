@@ -63,6 +63,7 @@ func init() {
 		idl.Substep_copy_master,
 		idl.Substep_upgrade_primaries,
 		idl.Substep_start_target_cluster,
+		idl.Substep_create_gp_toolkit_extension,
 	}
 
 	finalizeSubsteps = substeps.Substeps{
