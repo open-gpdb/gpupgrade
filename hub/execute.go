@@ -121,6 +121,10 @@ the master.`
 		return s.Intermediate.Start(streams)
 	})
 
+	st.RunConditionally(idl.Substep_create_gp_toolkit_extension, s.Intermediate.IsCloudberry(), func(_ step.OutStreams) error {
+		return CreateGpToolkitExtension(s.Intermediate)
+	})
+
 	encodedIntermediate, err := s.Intermediate.Encode()
 	if err != nil {
 		return err
