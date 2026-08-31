@@ -232,6 +232,33 @@ func (c *Cluster) IsCloudberry() bool {
 	return c.Product == ProductCloudberry
 }
 
+const (
+	// GreenplumEnvironmentFile is the shell script Greenplum ships in GPHOME to
+	// set up PATH, LD_LIBRARY_PATH, PYTHONPATH, and friends.
+	GreenplumEnvironmentFile = "greenplum_path.sh"
+
+	// CloudberryEnvironmentFile is the equivalent script in Apache Cloudberry,
+	// which renamed greenplum_path.sh as part of dropping the Greenplum branding.
+	CloudberryEnvironmentFile = "cloudberry-env.sh"
+)
+
+// EnvironmentFile returns the name of the script under GPHome that sets up this
+// product's runtime environment. Branch on the detected product (see Product),
+// never on the version number: Cloudberry's majors are on an independent track.
+func (c *Cluster) EnvironmentFile() string {
+	if c.IsCloudberry() {
+		return CloudberryEnvironmentFile
+	}
+
+	return GreenplumEnvironmentFile
+}
+
+// EnvironmentFilePath returns the absolute path to EnvironmentFile. Use it both
+// when running utilities and when telling the user how to connect to a cluster.
+func (c *Cluster) EnvironmentFilePath() string {
+	return filepath.Join(c.GPHome, c.EnvironmentFile())
+}
+
 // PostgresMajorVersion returns the major version of the PostgreSQL release on
 // which this product version is based. It panics for unknown mappings so new
 // product versions cannot silently assume PostgreSQL compatibility.
@@ -457,7 +484,7 @@ func (c *Cluster) runGreenplumCommand(streams step.OutStreams, utility string, a
 	path := filepath.Join(c.GPHome, "bin", utility)
 	args = append([]string{path}, args...)
 
-	cmd := greenplumCommand("bash", "-c", fmt.Sprintf("source %s/greenplum_path.sh && %s", c.GPHome, shellquote.Join(args...)))
+	cmd := greenplumCommand("bash", "-c", fmt.Sprintf("source %s && %s", c.EnvironmentFilePath(), shellquote.Join(args...)))
 	cmd.Env = append(cmd.Env, fmt.Sprintf("%v=%v", "MASTER_DATA_DIRECTORY", c.CoordinatorDataDir()))
 	cmd.Env = append(cmd.Env, fmt.Sprintf("%v=%v", "PGPORT", c.CoordinatorPort()))
 	cmd.Env = append(cmd.Env, envs...)

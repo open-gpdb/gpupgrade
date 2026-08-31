@@ -463,6 +463,25 @@ func TestRunGreenplumCmd(t *testing.T) {
 		}
 	})
 
+	t.Run("sources cloudberry-env.sh on a Cloudberry cluster", func(t *testing.T) {
+		cloudberry := cluster
+		cloudberry.Product = greenplum.ProductCloudberry
+
+		cmd := exectest.NewCommandWithVerifier(Success, func(name string, args ...string) {
+			expectedArgs := []string{"-c", "source /usr/local/greenplum-db/cloudberry-env.sh && /usr/local/greenplum-db/bin/gpaddmirrors -a"}
+			if !reflect.DeepEqual(args, expectedArgs) {
+				t.Errorf("got %q want %q", args, expectedArgs)
+			}
+		})
+		greenplum.SetGreenplumCommand(cmd)
+		defer greenplum.ResetGreenplumCommand()
+
+		err := cloudberry.RunGreenplumCmd(step.DevNullStream, "gpaddmirrors", "-a")
+		if err != nil {
+			t.Errorf("unexpected error: %#v", err)
+		}
+	})
+
 	t.Run("sets greenplum environment variables", func(t *testing.T) {
 		coordinatorDataDirectory := "MASTER_DATA_DIRECTORY"
 		resetEnv := testutils.MustClearEnv(t, coordinatorDataDirectory)
@@ -499,6 +518,34 @@ func TestRunGreenplumCmd(t *testing.T) {
 			t.Errorf("got %T, want %T", err, exitError)
 		}
 	})
+}
+
+func TestEnvironmentFile(t *testing.T) {
+	cases := []struct {
+		desc     string
+		product  greenplum.Product
+		version  semver.Version
+		expected string
+	}{
+		{"Greenplum ships greenplum_path.sh", greenplum.ProductGreenplum, semver.MustParse("6.20.0"), "/usr/local/gphome/greenplum_path.sh"},
+		{"Cloudberry ships cloudberry-env.sh", greenplum.ProductCloudberry, semver.MustParse("2.1.0"), "/usr/local/gphome/cloudberry-env.sh"},
+		// The product is authoritative, not the version number: a Cloudberry
+		// major that looks like a Greenplum major must still get its own file.
+		{"a Cloudberry major that collides with Greenplum's", greenplum.ProductCloudberry, semver.MustParse("7.0.0"), "/usr/local/gphome/cloudberry-env.sh"},
+		// An undetected product is treated as Greenplum, the historical default.
+		{"an undetected product falls back to Greenplum", greenplum.ProductUnknown, semver.MustParse("6.20.0"), "/usr/local/gphome/greenplum_path.sh"},
+	}
+
+	for _, c := range cases {
+		t.Run(c.desc, func(t *testing.T) {
+			cluster := greenplum.Cluster{GPHome: "/usr/local/gphome", Product: c.product, Version: c.version}
+
+			actual := cluster.EnvironmentFilePath()
+			if actual != c.expected {
+				t.Errorf("got %q want %q", actual, c.expected)
+			}
+		})
+	}
 }
 
 func TestGetCoordinatorSegPrefix(t *testing.T) {

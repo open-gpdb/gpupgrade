@@ -250,7 +250,7 @@ func verifyRevert(t *testing.T, source greenplum.Cluster, intermediate *greenplu
 
 	match := fmt.Sprintf(commands.RevertCompletedText,
 		source.Version,
-		filepath.Join(source.GPHome, "greenplum_path.sh"), source.CoordinatorDataDir(), source.CoordinatorPort(),
+		source.EnvironmentFilePath(), source.CoordinatorDataDir(), source.CoordinatorPort(),
 		logArchiveDir+`\d{5}`,
 		idl.Step_revert,
 		source.GPHome, source.CoordinatorPort(), filepath.Join(logArchiveDir+`\d{5}`, "data-migration-scripts"), idl.Step_revert)

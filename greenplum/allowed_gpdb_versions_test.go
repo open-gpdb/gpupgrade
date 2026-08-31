@@ -371,7 +371,7 @@ func TestValidateUsesProductIdentity(t *testing.T) {
 	})
 
 	t.Run("rejects a Cloudberry version below the minimum", func(t *testing.T) {
-		target := semver.MustParse("1.99.99")
+		target := semver.MustParse("2.0.0")
 		err := validate(ProductGreenplum, source, ProductCloudberry, target)
 		if err == nil {
 			t.Fatal("expected unsupported target version error")

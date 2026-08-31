@@ -78,9 +78,10 @@ func (s *Server) RemoveIntermediateCluster(streams step.OutStreams) error {
 }
 
 func InitTargetCluster(stream step.OutStreams, intermediate *greenplum.Cluster) error {
-	// Sanitize the child environment. The sourcing of greenplum_path.sh will
-	// give us back almost everything we need, but it's important not to put a
-	// previous installation's ambient environment into the mix.
+	// Sanitize the child environment. The sourcing of the target's environment
+	// file (greenplum_path.sh, or cloudberry-env.sh on Cloudberry) will give us
+	// back almost everything we need, but it's important not to put a previous
+	// installation's ambient environment into the mix.
 	//
 	// gpinitsystem unfortunately relies on a few envvars for logging purposes;
 	// otherwise, we could clear the environment completely.

@@ -94,7 +94,7 @@ func revert() *cobra.Command {
 
 			return st.Complete(fmt.Sprintf(RevertCompletedText,
 				source.Version,
-				filepath.Join(source.GPHome, "greenplum_path.sh"), source.CoordinatorDataDir(), source.CoordinatorPort(),
+				source.EnvironmentFilePath(), source.CoordinatorDataDir(), source.CoordinatorPort(),
 				response.GetLogArchiveDirectory(),
 				idl.Step_revert,
 				source.GPHome, source.CoordinatorPort(), filepath.Join(response.GetLogArchiveDirectory(), "data-migration-scripts"), idl.Step_revert))

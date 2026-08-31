@@ -13,7 +13,7 @@ import (
 const min5xVersion = "5.29.10"
 const min6xVersion = "6.0.0"
 const min7xVersion = "7.0.0"
-const minCloudberryVersion = "2.0.0"
+const minCloudberryVersion = "2.1.0"
 
 var GetSourceVersion = VersionWithProduct
 var GetTargetVersion = VersionWithProduct
@@ -65,7 +65,7 @@ func validate(sourceProduct Product, sourceVersion semver.Version, targetProduct
 	default:
 		return fmt.Errorf("Unsupported source and target versions. "+
 			"Found source version %s and target version %s. "+
-			"Upgrade is only supported for Greenplum 5 to 6, Greenplum 6 to 7 and Greenplum 6 to Cloudberry 2.0.0+ "+
+			"Upgrade is only supported for Greenplum 5 to 6, Greenplum 6 to 7 and Greenplum 6 to Cloudberry 2.1.0+ "+
 			"Check the documentation for further information.", sourceVersion, targetVersion)
 	}
 

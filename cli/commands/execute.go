@@ -6,7 +6,6 @@ package commands
 import (
 	"errors"
 	"fmt"
-	"path/filepath"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/text/cases"
@@ -95,7 +94,7 @@ func execute() *cobra.Command {
 			})
 
 			return st.Complete(fmt.Sprintf(ExecuteCompletedText,
-				filepath.Join(intermediate.GPHome, "greenplum_path.sh"),
+				intermediate.EnvironmentFilePath(),
 				intermediate.CoordinatorDataDir(),
 				intermediate.CoordinatorPort()))
 		},
