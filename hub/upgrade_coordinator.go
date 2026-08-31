@@ -85,7 +85,7 @@ source %s
 MASTER_DATA_DIRECTORY=%s
 PGPORT=%d`, pgUpgradeDir,
 			source.GPHome, source.CoordinatorPort(), generatedScriptsOutputDir,
-			filepath.Join(intermediate.GPHome, "greenplum_path.sh"), intermediate.CoordinatorDataDir(), intermediate.CoordinatorPort())
+			intermediate.EnvironmentFilePath(), intermediate.CoordinatorDataDir(), intermediate.CoordinatorPort())
 
 		return utils.NewNextActionErr(xerrors.Errorf("%s master: %v", action, err), nextAction)
 	}
