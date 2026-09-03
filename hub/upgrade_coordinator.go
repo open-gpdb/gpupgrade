@@ -50,7 +50,7 @@ func UpgradeCoordinator(streams step.OutStreams, backupDir string, pgUpgradeVerb
 		NewDataDir:          intermediate.CoordinatorDataDir(),
 		NewPort:             strconv.Itoa(intermediate.CoordinatorPort()),
 		NewDBID:             strconv.Itoa(intermediate.Coordinator().DbID),
-		PgUpgradeTimestamp:  pgUpgradeTimestamp,
+		PgUpgradeTimeStamp:  pgUpgradeTimestamp,
 	}
 
 	err := RsyncCoordinatorDataDir(streams, utils.GetCoordinatorPreUpgradeBackupDir(backupDir), intermediate.CoordinatorDataDir())
