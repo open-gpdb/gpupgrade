@@ -281,9 +281,12 @@ func GenerateScriptsPerDatabase(streams step.OutStreams, database DatabaseInfo, 
 		go func(phase idl.Step, database DatabaseInfo, gphome string, port int, seedDir string, outputDir string, bar *mpb.Bar) {
 			defer wg.Done()
 
-			err = GenerateScriptsPerPhase(phase, database, gphome, port, seedDir, utils.System.DirFS(seedDir), outputDir, bar)
-			if err != nil {
-				errChan <- err
+			// Use a phase-local error. Assigning to the captured outer "err"
+			// here races with the other phase goroutines, which could clobber a
+			// real failure with another goroutine's nil and lose it entirely.
+			phaseErr := GenerateScriptsPerPhase(phase, database, gphome, port, seedDir, utils.System.DirFS(seedDir), outputDir, bar)
+			if phaseErr != nil {
+				errChan <- phaseErr
 				return
 			}
 		}(phase, database, gphome, port, seedDir, outputDir, bar)
