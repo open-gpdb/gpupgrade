@@ -86,7 +86,7 @@ func TestRun(t *testing.T) {
 			Role:               greenplum.MirrorRole,
 			ContentID:          3,
 			TargetVersion:      "6.20.0",
-			PgUpgradeTimestamp: "RandomTimestamp",
+			PgUpgradeTimeStamp: "RandomTimestamp",
 		}
 
 		err := upgrade.Run(nil, nil, opts)
@@ -114,7 +114,7 @@ func TestRun(t *testing.T) {
 			Role:               greenplum.MirrorRole,
 			ContentID:          3,
 			TargetVersion:      "6.20.0",
-			PgUpgradeTimestamp: "RandomTimestamp",
+			PgUpgradeTimeStamp: "RandomTimestamp",
 		}
 
 		err = upgrade.Run(nil, nil, opts)
@@ -166,7 +166,7 @@ func TestRun(t *testing.T) {
 			Role:               greenplum.MirrorRole,
 			ContentID:          3,
 			TargetVersion:      "6.20.0",
-			PgUpgradeTimestamp: "RandomTimestamp",
+			PgUpgradeTimeStamp: "RandomTimestamp",
 		}
 		err := upgrade.Run(stdout, stderr, opts)
 		if err != nil {
@@ -195,7 +195,7 @@ func TestRun(t *testing.T) {
 			Role:               greenplum.MirrorRole,
 			ContentID:          3,
 			TargetVersion:      "6.20.0",
-			PgUpgradeTimestamp: "RandomTimestamp",
+			PgUpgradeTimeStamp: "RandomTimestamp",
 		}
 		err := upgrade.Run(stdout, nil, opts)
 		if err != nil {
@@ -231,7 +231,7 @@ func TestRun(t *testing.T) {
 			Role:               greenplum.MirrorRole,
 			ContentID:          3,
 			TargetVersion:      "6.20.0",
-			PgUpgradeTimestamp: "RandomTimestamp",
+			PgUpgradeTimeStamp: "RandomTimestamp",
 		}
 		err := upgrade.Run(stdout, nil, opts)
 		if err != nil {
@@ -262,7 +262,7 @@ func TestRun(t *testing.T) {
 			Role:               greenplum.MirrorRole,
 			ContentID:          3,
 			TargetVersion:      "6.20.0",
-			PgUpgradeTimestamp: "RandomTimestamp",
+			PgUpgradeTimeStamp: "RandomTimestamp",
 		}
 
 		err := upgrade.Run(nil, nil, opts)
@@ -328,7 +328,7 @@ func TestRun(t *testing.T) {
 				Tablespaces: map[int32]*idl.TablespaceInfo{
 					1663: {Location: "/tmp/primary1/1663", UserDefined: false},
 					1664: {Location: "/tmp/primary1/1664", UserDefined: true}},
-				PgUpgradeTimestamp: "RandomTimestamp",
+				PgUpgradeTimeStamp: "RandomTimestamp",
 			},
 		},
 		{
@@ -354,7 +354,7 @@ func TestRun(t *testing.T) {
 				Role:               greenplum.PrimaryRole,
 				ContentID:          3,
 				TargetVersion:      "6.20.0",
-				PgUpgradeTimestamp: "RandomTimestamp",
+				PgUpgradeTimeStamp: "RandomTimestamp",
 			},
 		},
 		{
@@ -378,7 +378,7 @@ func TestRun(t *testing.T) {
 				Role:               greenplum.PrimaryRole,
 				ContentID:          3,
 				TargetVersion:      "6.20.0",
-				PgUpgradeTimestamp: "RandomTimestamp",
+				PgUpgradeTimeStamp: "RandomTimestamp",
 			},
 		},
 		{
@@ -403,7 +403,7 @@ func TestRun(t *testing.T) {
 				Role:               greenplum.PrimaryRole,
 				ContentID:          3,
 				TargetVersion:      "6.20.0",
-				PgUpgradeTimestamp: "RandomTimestamp",
+				PgUpgradeTimeStamp: "RandomTimestamp",
 			},
 		},
 		{
@@ -431,7 +431,7 @@ func TestRun(t *testing.T) {
 				Role:                greenplum.PrimaryRole,
 				ContentID:           3,
 				TargetVersion:       "6.20.0",
-				PgUpgradeTimestamp:  "RandomTimestamp",
+				PgUpgradeTimeStamp:  "RandomTimestamp",
 			},
 		},
 		{
@@ -455,7 +455,7 @@ func TestRun(t *testing.T) {
 				Role:               greenplum.PrimaryRole,
 				ContentID:          3,
 				TargetVersion:      "6.20.0",
-				PgUpgradeTimestamp: "RandomTimestamp",
+				PgUpgradeTimeStamp: "RandomTimestamp",
 			},
 		},
 		{
@@ -481,7 +481,7 @@ func TestRun(t *testing.T) {
 				Role:                greenplum.PrimaryRole,
 				ContentID:           3,
 				TargetVersion:       "6.20.0",
-				PgUpgradeTimestamp:  "RandomTimestamp",
+				PgUpgradeTimeStamp:  "RandomTimestamp",
 			},
 		},
 		{
@@ -506,7 +506,7 @@ func TestRun(t *testing.T) {
 				ContentID:          3,
 				Action:             idl.PgOptions_check,
 				TargetVersion:      "6.20.0",
-				PgUpgradeTimestamp: "RandomTimestamp",
+				PgUpgradeTimeStamp: "RandomTimestamp",
 			},
 		},
 		{
@@ -531,7 +531,7 @@ func TestRun(t *testing.T) {
 				ContentID:          3,
 				Action:             idl.PgOptions_upgrade,
 				TargetVersion:      "6.20.0",
-				PgUpgradeTimestamp: "RandomTimestamp",
+				PgUpgradeTimeStamp: "RandomTimestamp",
 			},
 		},
 		{
@@ -557,7 +557,7 @@ func TestRun(t *testing.T) {
 				ContentID:          3,
 				Mode:               idl.Mode_link,
 				TargetVersion:      "6.20.0",
-				PgUpgradeTimestamp: "RandomTimestamp",
+				PgUpgradeTimeStamp: "RandomTimestamp",
 			},
 		},
 		{
@@ -582,7 +582,7 @@ func TestRun(t *testing.T) {
 				ContentID:          3,
 				Mode:               idl.Mode_copy,
 				TargetVersion:      "6.20.0",
-				PgUpgradeTimestamp: "RandomTimestamp",
+				PgUpgradeTimeStamp: "RandomTimestamp",
 			},
 		},
 		{
@@ -607,7 +607,7 @@ func TestRun(t *testing.T) {
 				ContentID:          -1,
 				Action:             idl.PgOptions_check,
 				TargetVersion:      "6.20.0",
-				PgUpgradeTimestamp: "RandomTimestamp",
+				PgUpgradeTimeStamp: "RandomTimestamp",
 			},
 		},
 		{
@@ -632,7 +632,7 @@ func TestRun(t *testing.T) {
 				ContentID:          3,
 				Action:             idl.PgOptions_upgrade,
 				TargetVersion:      "6.20.0",
-				PgUpgradeTimestamp: "RandomTimestamp",
+				PgUpgradeTimeStamp: "RandomTimestamp",
 			},
 		},
 		{
@@ -659,7 +659,7 @@ func TestRun(t *testing.T) {
 				TargetVersion:      "6.20.0",
 				OldDBID:            "0",
 				NewDBID:            "1",
-				PgUpgradeTimestamp: "RandomTimestamp",
+				PgUpgradeTimeStamp: "RandomTimestamp",
 			},
 		},
 		{
@@ -684,7 +684,7 @@ func TestRun(t *testing.T) {
 				TargetVersion:      "7.1.0",
 				OldDBID:            "0",
 				NewDBID:            "1",
-				PgUpgradeTimestamp: "RandomTimestamp",
+				PgUpgradeTimeStamp: "RandomTimestamp",
 			},
 		},
 		{
@@ -708,7 +708,7 @@ func TestRun(t *testing.T) {
 				Role:               greenplum.PrimaryRole,
 				ContentID:          3,
 				TargetVersion:      "6.20.0",
-				PgUpgradeTimestamp: "RandomTimestamp",
+				PgUpgradeTimeStamp: "RandomTimestamp",
 			},
 		},
 		{
@@ -733,7 +733,7 @@ func TestRun(t *testing.T) {
 				ContentID:          3,
 				TargetVersion:      "6.20.0",
 				PgUpgradeJobs:      "123",
-				PgUpgradeTimestamp: "RandomTimestamp",
+				PgUpgradeTimeStamp: "RandomTimestamp",
 			},
 		},
 		{
@@ -757,7 +757,7 @@ func TestRun(t *testing.T) {
 				Role:               greenplum.PrimaryRole,
 				ContentID:          3,
 				TargetVersion:      "6.20.0",
-				PgUpgradeTimestamp: "RandomTimestamp",
+				PgUpgradeTimeStamp: "RandomTimestamp",
 			},
 		},
 		{
@@ -779,7 +779,7 @@ func TestRun(t *testing.T) {
 				Role:               greenplum.PrimaryRole,
 				ContentID:          3,
 				TargetVersion:      "7.1.0",
-				PgUpgradeTimestamp: "RandomTimestamp",
+				PgUpgradeTimeStamp: "RandomTimestamp",
 			},
 		},
 	}
