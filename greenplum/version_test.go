@@ -110,8 +110,8 @@ func TestVersion_Parsing(t *testing.T) {
 		versionCommand exectest.Main
 		expected       error
 	}{
-		{name: "handles empty version", versionCommand: EmptyString, expected: errors.New(`Greenplum version "\n" is not of the form "postgres (Greenplum Database) #.#.#"`)},
-		{name: "handles only marker string", versionCommand: MarkerOnly, expected: errors.New(`Greenplum version "postgres (Greenplum Database)\n" is not of the form "postgres (Greenplum Database) #.#.#"`)},
+		{name: "handles empty version", versionCommand: EmptyString, expected: errors.New(`version "\n" is not of the form "postgres (Greenplum Database|Apache Cloudberry) #.#.#"`)},
+		{name: "handles only marker string", versionCommand: MarkerOnly, expected: errors.New(`no version number found in "postgres (Greenplum Database)\n"`)},
 	}
 
 	for _, c := range errCases {

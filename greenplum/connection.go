@@ -28,7 +28,7 @@ func (c *Cluster) Connection(options ...Option) string {
 
 	if opts.utilityMode {
 		mode := "&gp_role=utility"
-		if c.Version.Major < 7 {
+		if c.PostgresMajorVersion() < 12 {
 			mode = "&gp_session_role=utility"
 		}
 

@@ -21,7 +21,7 @@ func Bootstrap(destination idl.ClusterDestination, gphome string, port int) (*sq
 
 	// destination and version are needed when creating the connection
 	cluster.Destination = destination
-	cluster.Version, err = greenplum.Version(gphome)
+	cluster.Product, cluster.Version, err = greenplum.VersionWithProduct(gphome)
 	if err != nil {
 		return nil, err
 	}

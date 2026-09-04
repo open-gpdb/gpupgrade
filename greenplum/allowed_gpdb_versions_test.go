@@ -28,11 +28,11 @@ func TestVerifyCompatibleGPDBVersions(t *testing.T) {
 
 	t.Run("errors when failing to get source cluster version", func(t *testing.T) {
 		expected := os.ErrNotExist
-		GetSourceVersion = func(gphome string) (semver.Version, error) {
-			return semver.Version{}, expected
+		GetSourceVersion = func(gphome string) (Product, semver.Version, error) {
+			return ProductUnknown, semver.Version{}, expected
 		}
 		defer func() {
-			GetSourceVersion = Version
+			GetSourceVersion = VersionWithProduct
 		}()
 
 		err := VerifyCompatibleGPDBVersions("", "")
@@ -42,19 +42,19 @@ func TestVerifyCompatibleGPDBVersions(t *testing.T) {
 	})
 
 	t.Run("errors when failing to get target cluster version", func(t *testing.T) {
-		GetSourceVersion = func(gphome string) (semver.Version, error) {
-			return semver.Version{}, nil
+		GetSourceVersion = func(gphome string) (Product, semver.Version, error) {
+			return ProductGreenplum, semver.Version{}, nil
 		}
 		defer func() {
-			GetSourceVersion = Version
+			GetSourceVersion = VersionWithProduct
 		}()
 
 		expected := os.ErrNotExist
-		GetTargetVersion = func(gphome string) (semver.Version, error) {
-			return semver.Version{}, expected
+		GetTargetVersion = func(gphome string) (Product, semver.Version, error) {
+			return ProductUnknown, semver.Version{}, expected
 		}
 		defer func() {
-			GetTargetVersion = Version
+			GetTargetVersion = VersionWithProduct
 		}()
 
 		err := VerifyCompatibleGPDBVersions("", "")
@@ -200,7 +200,7 @@ func TestValidate(t *testing.T) {
 
 		for _, c := range cases {
 			t.Run(c.name, func(t *testing.T) {
-				err := validate(c.sourceVersion, c.targetVersion)
+				err := validate(ProductGreenplum, c.sourceVersion, ProductGreenplum, c.targetVersion)
 				if err != nil {
 					t.Errorf("unexpected err %#v", err)
 				}
@@ -346,9 +346,9 @@ func TestValidate(t *testing.T) {
 
 		for _, c := range errorCases {
 			t.Run(c.name, func(t *testing.T) {
-				err := validate(c.sourceVersion, c.targetVersion)
+				err := validate(ProductGreenplum, c.sourceVersion, ProductGreenplum, c.targetVersion)
 				if err == nil {
-					t.Error("expected error got nil")
+					t.Fatal("expected error got nil")
 				}
 
 				if !strings.Contains(err.Error(), c.toContain) {
@@ -356,6 +356,44 @@ func TestValidate(t *testing.T) {
 					t.Errorf("to contain: %q", c.toContain)
 				}
 			})
+		}
+	})
+}
+
+func TestValidateUsesProductIdentity(t *testing.T) {
+	source := semver.MustParse("6.0.0")
+
+	t.Run("accepts the minimum supported Cloudberry version", func(t *testing.T) {
+		err := validate(ProductGreenplum, source, ProductCloudberry, semver.MustParse(minCloudberryVersion))
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+	})
+
+	t.Run("rejects a Cloudberry version below the minimum", func(t *testing.T) {
+		target := semver.MustParse("1.99.99")
+		err := validate(ProductGreenplum, source, ProductCloudberry, target)
+		if err == nil {
+			t.Fatal("expected unsupported target version error")
+		}
+
+		expected := fmt.Sprintf("Target cluster version %s is not supported. The minimum required version is %s.", target, minCloudberryVersion)
+		if !strings.Contains(err.Error(), expected) {
+			t.Errorf("expected error %q to contain %q", err, expected)
+		}
+	})
+
+	t.Run("accepts a future Cloudberry major", func(t *testing.T) {
+		err := validate(ProductGreenplum, source, ProductCloudberry, semver.MustParse("5.0.0"))
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+	})
+
+	t.Run("does not mistake a Greenplum version for Cloudberry", func(t *testing.T) {
+		err := validate(ProductGreenplum, source, ProductGreenplum, semver.MustParse("2.0.0"))
+		if err == nil {
+			t.Fatal("expected incompatible products to be rejected")
 		}
 	})
 }
@@ -382,7 +420,11 @@ func MustIncrementPatch(t *testing.T, version string) semver.Version {
 
 func MustDecrementMinor(t *testing.T, version string) semver.Version {
 	semverVersion := semver.MustParse(version)
-	semverVersion.Minor--
+	if semverVersion.Minor == 0 {
+		semverVersion.Pre = []semver.PRVersion{semver.MustParse("0.0.0-0").Pre[0]}
+	} else {
+		semverVersion.Minor--
+	}
 	semverVersion.Patch = 0
 	return semverVersion
 }
@@ -390,7 +432,11 @@ func MustDecrementMinor(t *testing.T, version string) semver.Version {
 func MustDecrementPatch(t *testing.T, version string) semver.Version {
 	semverVersion := semver.MustParse(version)
 	if semverVersion.Patch == 0 {
-		semverVersion.Minor--
+		if semverVersion.Minor == 0 {
+			semverVersion.Pre = []semver.PRVersion{semver.MustParse("0.0.0-0").Pre[0]}
+		} else {
+			semverVersion.Minor--
+		}
 		return semverVersion
 	}
 

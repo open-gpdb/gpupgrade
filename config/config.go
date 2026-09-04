@@ -97,7 +97,7 @@ func Create(db *sql.DB, hubPort int, agentPort int, sourceGPHome string, targetG
 		return Config{}, err
 	}
 
-	targetVersion, err := greenplum.Version(targetGPHome)
+	targetProduct, targetVersion, err := greenplum.VersionWithProduct(targetGPHome)
 	if err != nil {
 		return Config{}, err
 	}
@@ -121,11 +121,18 @@ func Create(db *sql.DB, hubPort int, agentPort int, sourceGPHome string, targetG
 	config.Target.Destination = idl.ClusterDestination_target
 	config.Target.GPHome = targetGPHome
 	config.Target.Version = targetVersion
+	// target was copied from source, so its product must be reset to the
+	// target's; source and target can be different products (e.g. Greenplum 6
+	// to Cloudberry).
+	config.Target.Product = targetProduct
 
 	config.Intermediate, err = GenerateIntermediateCluster(config.Source, ports, config.UpgradeID, config.Target.Version, config.Target.GPHome)
 	if err != nil {
 		return Config{}, err
 	}
+	// The intermediate cluster is the initialized target, so it shares the
+	// target's product.
+	config.Intermediate.Product = targetProduct
 
 	if err := EnsureTempPortRangeDoesNotOverlapWithSourceClusterPorts(config.Source, config.Intermediate); err != nil {
 		return Config{}, err
