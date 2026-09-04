@@ -20,7 +20,7 @@ import (
 )
 
 func UpdateConfFiles(agentConns []*idl.Connection, _ step.OutStreams, version semver.Version, intermediate *greenplum.Cluster, target *greenplum.Cluster) error {
-	if version.Major < 7 {
+	if target.PostgresMajorVersion() < 12 {
 		// update gpperfmon.conf on coordinator
 		err := UpdateConfigurationFile([]*idl.UpdateFileConfOptions{{
 			Path:        filepath.Join(target.CoordinatorDataDir(), "gpperfmon", "conf", "gpperfmon.conf"),
