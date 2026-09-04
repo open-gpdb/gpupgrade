@@ -40,8 +40,8 @@ type Cluster struct {
 
 	Tablespaces Tablespaces
 
-	GPHome         string
-	Version        semver.Version
+	GPHome  string
+	Version semver.Version
 	// Product distinguishes Greenplum from Apache Cloudberry. It is detected
 	// from the version banner (see Product) and must not be inferred from
 	// Version, whose major number is an independent product axis.
@@ -232,20 +232,9 @@ func (c *Cluster) IsCloudberry() bool {
 	return c.Product == ProductCloudberry
 }
 
-// PostgresMajorVersion returns the major version of the PostgreSQL release this
-// product is based on. Behavioral differences in gpupgrade — recovery.conf vs
-// standby.signal, pg_stat_replication column names, the pg_stat_activity shape —
-// track the underlying PostgreSQL version, so branch on this rather than on
-// Version.Major.
-//
-//	Greenplum  5 -> 8     Cloudberry 1 -> 14
-//	Greenplum  6 -> 9     Cloudberry 2 -> 14
-//	Greenplum  7 -> 12    Cloudberry 3 -> 16
-//
-// Only the legacy Greenplum 5/6 lines are pre-12, and they are enumerated
-// explicitly, so any unknown or newer release — including a future Cloudberry
-// whose major exceeds Greenplum's — safely defaults to a modern (>= 12)
-// PostgreSQL and the corresponding modern behavior.
+// PostgresMajorVersion returns the major version of the PostgreSQL release on
+// which this product version is based. It panics for unknown mappings so new
+// product versions cannot silently assume PostgreSQL compatibility.
 func (c *Cluster) PostgresMajorVersion() int {
 	switch c.Product {
 	case ProductGreenplum:
@@ -259,23 +248,15 @@ func (c *Cluster) PostgresMajorVersion() int {
 		}
 	case ProductCloudberry:
 		switch c.Version.Major {
-		case 1, 2:
+		case 2:
 			return 14
 		case 3:
 			return 16
 		}
-	case ProductUnknown:
-		// Preserve the behavior of configs written before Product was added.
-		// Only the unambiguous legacy Greenplum versions need special handling.
-		switch c.Version.Major {
-		case 5:
-			return 8
-		case 6:
-			return 9
-		}
 	}
 
-	return 12 // modern default
+	log.Panicf("PostgreSQL major version is unknown for %s %s", c.Product, c.Version)
+	return 0
 }
 
 func (c *Cluster) HasAllMirrorsAndStandby() bool {
