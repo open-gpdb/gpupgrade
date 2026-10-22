@@ -188,6 +188,13 @@ func (s *Server) RestartAgents(ctx context.Context, in *idl.RestartAgentsRequest
 		return &idl.RestartAgentsReply{}, err
 	}
 
+	// A partial shutdown caches only failed agents. RestartAgents checks all
+	// source hosts, so discard that subset and reconnect to the full cluster.
+	s.mutex.Lock()
+	s.closeAgentConns()
+	s.agentConns = nil
+	s.mutex.Unlock()
+
 	_, err = s.AgentConns()
 	if err != nil {
 		return &idl.RestartAgentsReply{}, xerrors.Errorf("ensuring agent connections are ready: %w", err)
@@ -371,19 +378,15 @@ func EnsureConnsAreReady(agentConns []*idl.Connection, timeout time.Duration) er
 }
 
 // Closes all h.agentConns. Callers must hold the Server's mutex.
-//
-//	 TODO: this function assumes that all h.agentConns are _not_ in a terminal
-//		state(e.g. already closed).  If so, conn.Conn.WaitForStateChange() can block
-//		indefinitely.
+// Close transitions a connection to Shutdown synchronously, including when a
+// previous shutdown has already closed it; no further state change is needed.
 func (s *Server) closeAgentConns() {
 	for _, conn := range s.agentConns {
 		defer conn.CancelContext()
-		currState := conn.Conn.GetState()
 		err := conn.Conn.Close()
 		if err != nil {
 			log.Printf("Error closing hub to agent connection. host: %s, err: %s", conn.Hostname, err.Error())
 		}
-		conn.Conn.WaitForStateChange(context.Background(), currState)
 	}
 }
 
