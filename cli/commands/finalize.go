@@ -71,7 +71,8 @@ func finalize() *cobra.Command {
 				return nil
 			})
 
-			st.Run(idl.Substep_stop_hub_and_agents, func(streams step.OutStreams) error {
+			// A finalize retry starts services again, even after an earlier shutdown.
+			st.AlwaysRun(idl.Substep_stop_hub_and_agents, func(streams step.OutStreams) error {
 				return stopHubAndAgents()
 			})
 
