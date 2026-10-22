@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/blang/semver/v4"
+	"github.com/kballard/go-shellquote"
 	"github.com/pkg/errors"
 	"golang.org/x/xerrors"
 
@@ -44,6 +45,11 @@ func (s *Server) writeConf(db *sql.DB) error {
 	}
 
 	gpinitsystemConfig, err = GetCheckpointSegmentsAndEncoding(gpinitsystemConfig, s.Source.Version, db)
+	if err != nil {
+		return err
+	}
+
+	gpinitsystemConfig, err = GetLocaleSettings(gpinitsystemConfig, db)
 	if err != nil {
 		return err
 	}
@@ -123,6 +129,21 @@ func GetCheckpointSegmentsAndEncoding(gpinitsystemConfig []string, version semve
 	}
 
 	return gpinitsystemConfig, nil
+}
+
+func GetLocaleSettings(gpinitsystemConfig []string, db *sql.DB) ([]string, error) {
+	var collate, ctype string
+	err := db.QueryRow("SELECT current_setting('lc_collate'), current_setting('lc_ctype')").Scan(&collate, &ctype)
+	if err != nil {
+		return gpinitsystemConfig, xerrors.Errorf("retrieve source locale settings: %w", err)
+	}
+
+	// Match the source template1 database even when the user's environment has
+	// a different locale. Collation and character classification can differ.
+	return append(gpinitsystemConfig,
+		"LCCOLLATE="+shellquote.Join(collate),
+		"LCCTYPE="+shellquote.Join(ctype),
+	), nil
 }
 
 func CreateInitialInitsystemConfig(targetCoordinatorDataDir string, useHbaHostnames bool) ([]string, error) {

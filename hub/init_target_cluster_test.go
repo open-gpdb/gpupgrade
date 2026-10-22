@@ -159,6 +159,58 @@ func TestGetCheckpointSegmentsAndEncoding(t *testing.T) {
 	}
 }
 
+func TestGetLocaleSettings(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		collate string
+		ctype   string
+	}{
+		{"matching locales", "en_US.utf8", "en_US.utf8"},
+		{"different locales", "C", "en_US.utf8"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer testutils.FinishMock(mock, t)
+			defer db.Close()
+
+			mock.ExpectQuery("SELECT current_setting\\('lc_collate'\\), current_setting\\('lc_ctype'\\)").
+				WillReturnRows(sqlmock.NewRows([]string{"lc_collate", "lc_ctype"}).AddRow(tc.collate, tc.ctype))
+
+			actual, err := hub.GetLocaleSettings([]string{"ENCODING=UTF8"}, db)
+			if err != nil {
+				t.Fatal(err)
+			}
+			expected := []string{"ENCODING=UTF8", "LCCOLLATE=" + tc.collate, "LCCTYPE=" + tc.ctype}
+			if !reflect.DeepEqual(actual, expected) {
+				t.Errorf("got %v, want %v", actual, expected)
+			}
+		})
+	}
+
+	t.Run("returns source query errors", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer testutils.FinishMock(mock, t)
+		defer db.Close()
+
+		queryErr := errors.New("locale query failed")
+		mock.ExpectQuery("SELECT current_setting").WillReturnError(queryErr)
+		initial := []string{"ENCODING=UTF8"}
+		actual, err := hub.GetLocaleSettings(initial, db)
+		if !errors.Is(err, queryErr) {
+			t.Errorf("got error %v, want %v", err, queryErr)
+		}
+		if !reflect.DeepEqual(actual, initial) {
+			t.Errorf("got %v, want %v", actual, initial)
+		}
+	})
+}
+
 func TestWriteSegmentArray(t *testing.T) {
 	test := func(t *testing.T, intermediate *greenplum.Cluster, expected []string) {
 		t.Helper()
