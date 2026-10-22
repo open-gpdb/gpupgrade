@@ -241,10 +241,6 @@ func stopHubAndAgents() error {
 	}
 
 	_, err = client.StopServices(context.Background(), &idl.StopServicesRequest{})
-	if idl.ServerAlreadyStopped(err) {
-		return nil
-	}
-
 	if err != nil {
 		return err
 	}

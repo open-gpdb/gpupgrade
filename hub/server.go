@@ -101,41 +101,65 @@ func (s *Server) Start(port int, daemonize bool) error {
 }
 
 func (s *Server) StopServices(ctx context.Context, in *idl.StopServicesRequest) (*idl.StopServicesReply, error) {
-	err := s.StopAgents()
-	if err != nil {
-		log.Printf("stop agents: %v", err)
+	if err := s.StopAgents(); err != nil {
+		// Keep the hub available so failed agent shutdowns can be retried.
+		return nil, fmt.Errorf("stop agents: %w", err)
 	}
 
-	defer s.Stop(false)
+	// GracefulStop waits for this RPC to finish, so it must run separately.
+	// Start does not return until gRPC has sent the reply and drained its RPCs.
+	go s.stopGracefully()
 	return &idl.StopServicesReply{}, nil
 }
 
-// TODO: Add unit tests which is currently tricky due to h.AgentConns() mutating global state
 func (s *Server) StopAgents() error {
-	request := func(conn *idl.Connection) error {
-		_, err := conn.AgentClient.StopAgent(context.Background(), &idl.StopAgentRequest{})
-		if err == nil { // no error means the agent did not terminate as expected
-			return xerrors.Errorf("failed to stop agent on host: %s", conn.Hostname)
-		}
-
-		if idl.ServerAlreadyStopped(err) {
-			return nil
-		}
-
-		if err != nil {
-			return xerrors.Errorf("failed to stop agent on host %s : %w", conn.Hostname, err)
-		}
-
-		return nil
-	}
-
-	// FIXME: s.AgentConns() fails fast if a single agent isn't available
-	//    we need to connect to all available agents so we can stop just those
-	_, err := s.AgentConns()
+	conns, err := s.AgentConns()
 	if err != nil {
 		return err
 	}
-	return ExecuteRPC(s.agentConns, request)
+
+	stopped := make(chan *idl.Connection, len(conns))
+	err = ExecuteRPC(conns, func(conn *idl.Connection) error {
+		_, err := conn.AgentClient.StopAgent(context.Background(), &idl.StopAgentRequest{})
+		if err != nil {
+			return fmt.Errorf("failed to stop agent on host %s: %w", conn.Hostname, err)
+		}
+		stopped <- conn
+		return nil
+	})
+	close(stopped)
+
+	// Retain only failed agents for a retry. Successful shutdowns acknowledge
+	// completion before closing their transport; an EOF alone is not success.
+	stoppedConns := make(map[*idl.Connection]bool, len(conns))
+	for conn := range stopped {
+		stoppedConns[conn] = true
+		if closeErr := conn.Conn.Close(); closeErr != nil {
+			log.Printf("closing stopped agent connection on %s: %v", conn.Hostname, closeErr)
+		}
+		conn.CancelContext()
+	}
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	remaining := make([]*idl.Connection, 0, len(conns)-len(stoppedConns))
+	for _, conn := range conns {
+		if !stoppedConns[conn] {
+			remaining = append(remaining, conn)
+		}
+	}
+	s.agentConns = remaining
+	return err
+}
+
+func (s *Server) stopGracefully() {
+	s.mutex.Lock()
+	server := s.gRPCserver
+	s.mutex.Unlock()
+	// In-flight RPCs can need s.mutex while GracefulStop waits for them.
+	if server != nil {
+		server.GracefulStop()
+	}
+	s.Stop(false)
 }
 
 func (s *Server) Stop(closeAgentConns bool) {
@@ -150,6 +174,7 @@ func (s *Server) Stop(closeAgentConns bool) {
 	if s.gRPCserver != nil {
 		s.gRPCserver.Stop()
 		<-s.stopped // block until it is OK to stop
+		s.gRPCserver = nil
 	}
 
 	// Mark this server stopped so that a concurrent Start() doesn't try to

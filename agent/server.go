@@ -74,8 +74,19 @@ func (s *Server) Start(port int, stateDir string, daemonize bool) error {
 }
 
 func (s *Server) StopAgent(ctx context.Context, in *idl.StopAgentRequest) (*idl.StopAgentReply, error) {
-	s.Stop()
+	// Wait for this RPC's reply to be delivered before closing its transport.
+	go s.stopGracefully()
 	return &idl.StopAgentReply{}, nil
+}
+
+func (s *Server) stopGracefully() {
+	s.mutex.Lock()
+	server := s.gRPCserver
+	s.mutex.Unlock()
+	if server != nil {
+		server.GracefulStop()
+	}
+	s.Stop()
 }
 
 func (s *Server) Stop() {
@@ -85,6 +96,7 @@ func (s *Server) Stop() {
 	if s.gRPCserver != nil {
 		s.gRPCserver.Stop()
 		<-s.stoppedChan
+		s.gRPCserver = nil
 	}
 }
 
