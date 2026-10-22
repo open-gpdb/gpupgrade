@@ -21,13 +21,8 @@ func UpgradeMirrorsUsingRsync(agentConns []*idl.Connection, source *greenplum.Cl
 	if err != nil {
 		return err
 	}
-	defer func() {
-		if cErr := db.Close(); cErr != nil {
-			err = errorlist.Append(err, cErr)
-		}
-	}()
-
-	if err := CreateReplicationSlots(db); err != nil {
+	// Close our connection before smart shutdown waits for all clients to leave.
+	if err := createReplicationSlotsAndClose(db); err != nil {
 		return err
 	}
 
@@ -76,6 +71,14 @@ func UpgradeMirrorsUsingRsync(agentConns []*idl.Connection, source *greenplum.Cl
 	}
 
 	return nil
+}
+
+func createReplicationSlotsAndClose(db *sql.DB) (err error) {
+	defer func() {
+		err = errorlist.Append(err, db.Close())
+	}()
+
+	return CreateReplicationSlots(db)
 }
 
 func RsyncMirrorDataDirsOnSegments(agentConns []*idl.Connection, source *greenplum.Cluster, intermediate *greenplum.Cluster) error {
