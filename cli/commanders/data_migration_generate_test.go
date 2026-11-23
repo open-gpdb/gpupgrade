@@ -433,6 +433,65 @@ func TestGenerateScriptsPerDatabase(t *testing.T) {
 	})
 }
 
+func TestGenerateGphdfsRevertScripts(t *testing.T) {
+	const scriptDir = "revert/gphdfs_external_tables"
+	const script = "recreate_gphdfs_external_tables"
+	const client = `#!/bin/bash
+[[ " $* " == *" -h localhost "* && " $* " == *" -p 15432 "* ]] || exit 1
+`
+	seedFS := fstest.MapFS{scriptDir + "/" + script + ".sh": {}}
+	db := commanders.DatabaseInfo{Datname: "testdb", QuotedDatname: "testdb"}
+
+	for _, seeds := range []string{"5-to-6-seed-scripts", "6-to-7-seed-scripts"} {
+		seedDir := filepath.Join("..", "..", "data-migration-scripts", seeds)
+		for _, tc := range []struct {
+			name, psql, dump, wantSQL, wantErr string
+		}{
+			{"query fails", "echo 'connection failed' >&2; exit 2", "exit 99", "", "connection failed"},
+			{"no tables", "echo 'notice' >&2", "exit 99", "", ""},
+			{"dump succeeds", `echo 'public."external table"'`, `[[ "$5" == "--schema-only" && "$6" == "-t" &&
+    "$7" == 'public."external table"' && "$8" == "testdb" ]] || exit 1
+echo 'SELECT 1;'`, "\\c testdb\nSELECT 1;\n", ""},
+			{"dump fails", "echo public.t", "echo 'partial SQL'; echo 'dump failed' >&2; exit 1", "", "dump failed"},
+			{"dump warns", "echo public.t", "echo 'warning' >&2; echo 'SELECT 1;'", "\\c testdb\nSELECT 1;\n", ""},
+		} {
+			t.Run(seeds+"/"+tc.name, func(t *testing.T) {
+				gphome := t.TempDir()
+				bin := filepath.Join(gphome, "bin")
+				if err := os.Mkdir(bin, 0700); err != nil {
+					t.Fatal(err)
+				}
+				for name, body := range map[string]string{"psql": tc.psql, "pg_dump": tc.dump} {
+					if err := os.WriteFile(filepath.Join(bin, name), []byte(client+body+"\n"), 0700); err != nil {
+						t.Fatal(err)
+					}
+				}
+				outputDir := t.TempDir()
+				progress := mpb.New()
+				bar := progress.AddBar(1)
+				defer progress.Wait()
+				defer bar.Abort(false)
+				err := commanders.GenerateScriptsPerPhase(idl.Step_revert, db, gphome, 15432, seedDir, seedFS, outputDir, bar)
+				if tc.wantErr == "" && err != nil {
+					t.Fatal(err)
+				}
+				if tc.wantErr != "" && (err == nil || !strings.Contains(err.Error(), tc.wantErr)) {
+					t.Fatalf("got error %v, want %q", err, tc.wantErr)
+				}
+
+				got, err := os.ReadFile(filepath.Join(outputDir, "current", scriptDir, "migration_testdb_"+script+".sql"))
+				if tc.wantSQL == "" {
+					if !errors.Is(err, fs.ErrNotExist) {
+						t.Fatalf("expected no SQL file, got %q, error %v", got, err)
+					}
+				} else if err != nil || string(got) != tc.wantSQL {
+					t.Fatalf("got %q, error %v, want %q", got, err, tc.wantSQL)
+				}
+			})
+		}
+	}
+}
+
 func TestGenerateScriptsPerPhase(t *testing.T) {
 	phase := idl.Step_initialize
 	gphome := "/usr/local/gpdb5"
@@ -653,7 +712,7 @@ func TestGenerateScriptsPerPhase(t *testing.T) {
 				t.Errorf("got args %q want %q", actualArgs, expected)
 			}
 		}))
-		defer commanders.ResetPsqlCommand()
+		defer commanders.ResetBashCommand()
 
 		utils.System.MkdirAll = func(path string, perm os.FileMode) error {
 			return nil

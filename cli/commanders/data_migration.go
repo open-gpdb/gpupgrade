@@ -4,6 +4,7 @@
 package commanders
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"os/exec"
@@ -86,11 +87,20 @@ func ResetBashCommand() {
 func executeBashFile(gphome string, port int, path string, database string) ([]byte, error) {
 	cmd := bashCommand(path, gphome, strconv.Itoa(port), database)
 	cmd.Env = []string{}
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
 
 	log.Printf("Executing: %q", cmd.String())
-	output, err := cmd.CombinedOutput()
+	output, err := cmd.Output()
 	if err != nil {
-		return nil, fmt.Errorf("%q failed with %q: %w", cmd.String(), string(output), err)
+		diagnostic := stderr.Bytes()
+		if len(diagnostic) == 0 {
+			diagnostic = output
+		}
+		return nil, fmt.Errorf("%q failed with %q: %w", cmd.String(), diagnostic, err)
+	}
+	if stderr.Len() > 0 {
+		log.Printf("%s: %s", cmd.String(), stderr.String())
 	}
 
 	return output, nil
