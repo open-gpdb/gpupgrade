@@ -101,8 +101,7 @@ func GenerateDataMigrationScripts(streams step.OutStreams, nonInteractive bool, 
 		go func(streams step.OutStreams, database DatabaseInfo, gphome string, port int, seedDir string, outputDir string, bar *mpb.Bar) {
 			defer wg.Done()
 
-			err = GenerateScriptsPerDatabase(streams, database, gphome, port, seedDir, outputDir, bar)
-			if err != nil {
+			if err := GenerateScriptsPerDatabase(streams, database, gphome, port, seedDir, outputDir, bar); err != nil {
 				errChan <- err
 				bar.Abort(false)
 				return
